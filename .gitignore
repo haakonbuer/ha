@@ -1,0 +1,17 @@
+!*.yaml
+!.gitignore
+!*.md
+
+# Ignore folders
+.storage
+.cloud
+.google.token
+
+.shopping_list.json
+
+home-assistant.log*
+home-assistant_v2.db*
+
+ip_bans.yaml
+secrets.yaml
+known_devices.yaml

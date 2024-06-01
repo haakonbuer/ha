@@ -1,0 +1,137 @@
+- id: '1705959301700'
+  alias: Skru på lys når kommer hjem
+  description: Blink med lys nå bil plugges inn
+  trigger:
+  - type: plugged_in
+    platform: device
+    device_id: 2179acc88e7913ad34267533fe0b9fce
+    entity_id: ad043a3720ad13edc9bb3b9c4af6c21d
+    domain: binary_sensor
+  condition:
+  - condition: state
+    entity_id: zone.home
+    attribute: persons
+    state: '0'
+  action:
+  - service: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      area_id: living_room
+  mode: single
+- id: '1708381877754'
+  alias: Tv-tid på kvelden
+  description: Fiks lys for tv på kvelden i helger
+  trigger:
+  - platform: device
+    device_id: 641bcfb246f8306ef68e63cab345ea89
+    domain: media_player
+    entity_id: b83175687683108e9c249cb3417053a5
+    type: turned_on
+  condition:
+  - condition: time
+    after: '19:00:00'
+  action:
+  - service: hue.activate_scene
+    data: {}
+    target:
+      entity_id: scene.upstairs_kosestund
+  mode: single
+- id: '1714078223227'
+  alias: Lesestol - skru på når man setter seg ned
+  description: ''
+  trigger:
+  - type: occupied
+    platform: device
+    device_id: dff1b13328483c5f15b8eb2aa305d208
+    entity_id: 834eb9b0737a41eb41ae9ff96840eae3
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      device_id: 39cb21429aa12722dbce1862c8f5323e
+  mode: single
+- id: '1714078291568'
+  alias: Lesestol - skru av når man går
+  description: ''
+  trigger:
+  - type: not_occupied
+    platform: device
+    device_id: dff1b13328483c5f15b8eb2aa305d208
+    entity_id: 834eb9b0737a41eb41ae9ff96840eae3
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: 39cb21429aa12722dbce1862c8f5323e
+  mode: single
+- id: '1715242342399'
+  alias: WC-rom - Lys ved bevegelse
+  description: Skrur på lys på WC rom
+  use_blueprint:
+    path: homeassistant/motion_light.yaml
+    input:
+      motion_entity: binary_sensor.hue_motion_sensor_1_motion
+      light_target:
+        entity_id:
+        - light.wc_rom_speil
+        - light.wc_rom_taklys
+      no_motion_wait: 600
+- id: '1716889490904'
+  alias: Skru av lys om kvelden
+  description: ''
+  trigger:
+  - platform: time
+    at: 00:30:00
+  condition: []
+  action:
+  - service: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      floor_id:
+      - kjeller
+      - 1_etasje
+      - 2_etasje
+  mode: single
+- id: '1717103865567'
+  alias: Good morning
+  description: ''
+  trigger:
+  - platform: time
+    at: 07:00:00
+  condition: []
+  action:
+  - service: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      area_id:
+      - kitchen
+      - trapp
+  - service: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      area_id: bad
+  mode: single
+- id: '1717104216476'
+  alias: Test1
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: -01:00:00
+  condition: []
+  action:
+  - service: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.kveldskos_i_huset
+  mode: single

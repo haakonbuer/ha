@@ -1,0 +1,296 @@
+- id: '1707942063602'
+  name: Oppe uten lekerom
+  entities:
+    light.office:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      color_temp_kelvin: 2732
+      color_temp: 366
+      hs_color:
+      - 28.327
+      - 64.71
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      is_hue_group: true
+      hue_scenes:
+      - Bright
+      - Energize
+      - Arctic aurora
+      - Relax
+      - Nightlight
+      - Spring blossom
+      - Read
+      - Dimmed
+      - Tropical twilight
+      - Concentrate
+      - Savanna sunset
+      hue_type: room
+      lights:
+      - Hue color candle left
+      - Hue color candle right
+      - Lightstrip 2
+      dynamics: false
+      icon: mdi:lightbulb-group
+      friendly_name: Office
+      supported_features: 40
+      state: 'on'
+    light.tv:
+      supported_color_modes:
+      - xy
+      color_mode: xy
+      brightness: 255
+      hs_color:
+      - 38.824
+      - 53.333
+      rgb_color:
+      - 255
+      - 207
+      - 119
+      xy_color:
+      - 0.4578
+      - 0.412
+      is_hue_group: true
+      hue_scenes:
+      - Bright
+      - Arctic aurora
+      - Energize
+      - Relax
+      - Nightlight
+      - Spring blossom
+      - Read
+      - Dimmed
+      - Tropical twilight
+      - Concentrate
+      - Savanna sunset
+      hue_type: room
+      lights:
+      - Hue bloom 1
+      - Hue bloom 2
+      dynamics: false
+      icon: mdi:lightbulb-group
+      friendly_name: TV
+      supported_features: 40
+      state: 'on'
+    light.tak_oppe:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      is_hue_group: true
+      hue_scenes:
+      - Nightlight
+      - Dimmed
+      - Bright
+      - Fin
+      hue_type: room
+      lights:
+      - Takoppe
+      dynamics: false
+      icon: mdi:lightbulb-group
+      friendly_name: Tak oppe
+      supported_features: 40
+      state: 'on'
+  metadata:
+    light.office:
+      entity_only: true
+    light.tv:
+      entity_only: true
+    light.tak_oppe:
+      entity_only: true
+- id: '1714682182331'
+  name: Kveldskos i stua
+  entities:
+    light.stue_downlights_1:
+      supported_color_modes:
+      - brightness
+      friendly_name: Stue spotter ved kunst
+      supported_features: 0
+      color_mode: brightness
+      brightness: 186
+      state: 'on'
+    light.stue_dw3:
+      supported_color_modes:
+      - brightness
+      friendly_name: Stue downlights ved daybed
+      supported_features: 0
+      color_mode: brightness
+      brightness: 102
+      state: 'on'
+    light.stue_dow2:
+      supported_color_modes:
+      - brightness
+      friendly_name: Stue downlights ved bokhylle
+      supported_features: 0
+      color_mode: brightness
+      brightness: 153
+      state: 'on'
+    light.stue_dw4:
+      supported_color_modes:
+      - brightness
+      friendly_name: Stue downlight ved trapp
+      supported_features: 0
+      color_mode: brightness
+      brightness: 102
+      state: 'on'
+    light.tv:
+      supported_color_modes:
+      - xy
+      color_mode: xy
+      brightness: 69
+      hs_color:
+      - 33.767
+      - 84.314
+      rgb_color:
+      - 255
+      - 161
+      - 40
+      xy_color:
+      - 0.561
+      - 0.4042
+      is_hue_group: true
+      hue_scenes:
+      - Savanna sunset
+      - Nightlight
+      - Spring blossom
+      - Arctic aurora
+      - Energize
+      - Read
+      - Tropical twilight
+      - Concentrate
+      - Relax
+      - Bright
+      - Dimmed
+      hue_type: room
+      lights:
+      - Hue bloom 2
+      - Hue bloom 1
+      dynamics: false
+      icon: mdi:lightbulb-group
+      friendly_name: TV
+      supported_features: 40
+      state: 'on'
+  metadata:
+    light.stue_downlights_1:
+      entity_only: true
+    light.stue_dw3:
+      entity_only: true
+    light.stue_dow2:
+      entity_only: true
+    light.stue_dw4:
+      entity_only: true
+    light.tv:
+      entity_only: true
+- id: '1715285934191'
+  name: Kveldskos i huset
+  entities:
+    light.stue_downlights_1:
+      supported_color_modes:
+      - brightness
+      friendly_name: Stue spotter ved kunst
+      supported_features: 0
+      color_mode: brightness
+      brightness: 76
+      state: 'on'
+    light.stue_dw3:
+      supported_color_modes:
+      - brightness
+      friendly_name: Stue downlights ved daybed
+      supported_features: 0
+      color_mode: brightness
+      brightness: 128
+      state: 'on'
+    light.stue_dow2:
+      supported_color_modes:
+      - brightness
+      friendly_name: Stue downlights ved bokhylle
+      supported_features: 0
+      color_mode: brightness
+      brightness: 128
+      state: 'on'
+    light.stue_dw4:
+      supported_color_modes:
+      - brightness
+      friendly_name: Stue downlight ved trapp
+      supported_features: 0
+      color_mode: brightness
+      brightness: 128
+      state: 'on'
+    light.hue_bloom_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 128
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 39.416
+      - 53.725
+      rgb_color:
+      - 255
+      - 208
+      - 118
+      xy_color:
+      - 0.4577
+      - 0.4142
+      mode: normal
+      dynamics: none
+      friendly_name: Hue bloom 1
+      supported_features: 40
+      state: 'on'
+    light.hue_bloom_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 128
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 39.416
+      - 53.725
+      rgb_color:
+      - 255
+      - 208
+      - 118
+      xy_color:
+      - 0.4577
+      - 0.4142
+      mode: normal
+      dynamics: none
+      friendly_name: Hue bloom 2
+      supported_features: 40
+      state: 'on'
+  metadata:
+    light.stue_downlights_1:
+      entity_only: true
+    light.stue_dw3:
+      entity_only: true
+    light.stue_dow2:
+      entity_only: true
+    light.stue_dw4:
+      entity_only: true
+    light.hue_bloom_1:
+      entity_only: true
+    light.hue_bloom_2:
+      entity_only: true

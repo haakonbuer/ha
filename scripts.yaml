@@ -1,0 +1,50 @@
+leave_home:
+  alias: Leave Home
+  sequence:
+  - service: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      area_id:
+      - office
+      - playroom
+      - tv
+      - tak_oppe
+  - service: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Sov godt mine venner!
+  mode: single
+  icon: mdi:exit-run
+hello_world:
+  alias: Hello World
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.kveldskos_i_huset
+    data: {}
+  mode: single
+dra_pa_jobb:
+  alias: Dra på jobb
+  sequence:
+  - service: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      floor_id:
+      - kjeller
+      - 1_etasje
+      - 2_etasje
+  mode: single
+barna_sover:
+  alias: Barna sover
+  sequence:
+  - service: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.kveldskos_i_huset
+  mode: single
+god_natt:
+  alias: God natt
+  sequence: []
+  mode: single

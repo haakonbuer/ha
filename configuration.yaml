@@ -1,0 +1,369 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+knx:
+
+  expose:
+    - type: temperature
+      entity_id: sensor.knxTemp1
+      address: "2/1/2"
+
+  sensor:
+    - name: "Gang varmepådrag"
+      state_address: "2/0/0"
+      type: percent
+
+    - name: "Vaskerom gulvtemp"
+      state_address: "2/0/25"
+      type: temperature
+
+    - name: "Vaskerom lufttemp"
+      state_address: "2/0/24"
+      type: temperature
+
+    - name: "Power potential"
+      state_address: "0/0/102"
+      type: electric_potential
+
+    - name: "Power current"
+      state_address: "0/0/103"
+      type: electric_current
+      
+
+  climate:
+
+    # Klima i kjeller
+
+    - name: "Kjellergang"
+      temperature_address: "2/0/2"
+      target_temperature_address: "2/0/5"
+      target_temperature_state_address: "2/0/4"
+
+    - name: "Kjellerstue"
+      temperature_address: "2/0/13"
+      target_temperature_address: "2/0/16"
+      target_temperature_state_address: "2/0/15"
+
+    - name: "Vaskerom"
+      temperature_address: ["2/0/24", "2/0/25"]
+      target_temperature_address: "2/0/27"
+      target_temperature_state_address: "2/0/26"
+
+    # Klima i 1. etg
+
+    - name: "Entre"
+      temperature_address: "2/1/2"
+      target_temperature_address: "2/1/5"
+      target_temperature_state_address: "2/1/4"
+      command_value_state_address: "2/0/0"
+
+    - name: "Stue"
+      temperature_address: "2/1/13"
+      target_temperature_address: "2/1/16"
+      target_temperature_state_address: "2/1/15"
+
+    - name: "Kjøkken"
+      temperature_address: "2/1/24"
+      target_temperature_address: "2/1/27"
+      target_temperature_state_address: "2/1/26"
+
+    # Klima i 2. etg
+
+    - name: "Lekerom"
+      temperature_address: "2/2/2"
+      target_temperature_address: "2/2/5"
+      target_temperature_state_address: "2/2/4"
+
+    - name: "Bad"
+      temperature_address: "2/2/13"
+      target_temperature_address: "2/2/16"
+      target_temperature_state_address: "2/2/15"
+      on_off_address: "2/2/17"
+      on_off_state_address: "2/2/11"
+
+    - name: "Sov 1"
+      temperature_address: "2/2/24"
+      target_temperature_address: "2/2/27"
+      target_temperature_state_address: "2/2/26"
+
+    - name: "Sov 2"
+      temperature_address: "2/2/35"
+      target_temperature_address: "2/2/38"
+      target_temperature_state_address: "2/2/37"
+
+    - name: "Master sov"
+      temperature_address: "2/2/46"
+      target_temperature_address: "2/2/49"
+      target_temperature_state_address: "2/2/48"
+
+  light:
+    - name: "Alt lys"
+      address: "0/0/1"
+
+    ##############################################
+    # Lys i kjeller
+    
+    - name: "Vaskerom"
+      address: "1/0/143"
+      state_address: "1/0/146"
+      brightness_address: "1/0/145"
+      brightness_state_address: "1/0/147"
+
+    - name: "Kjellerstue"
+      address: "1/0/125"
+      state_address: "1/0/128"
+      brightness_address: "1/0/127"
+      brightness_state_address: "1/0/129"
+
+    - name: "Kjellergang"
+      address: "1/0/107"
+      state_address: "1/0/110"
+      brightness_address: "1/0/109"
+      brightness_state_address: "1/0/111"
+
+    ###############################################
+    # Lys i trapp
+
+    - name: "Trapp taklys"
+      address: "1/1/180"
+      state_address: "1/1/183"
+      brightness_address: "1/1/181"
+      brightness_state_address: "1/1/184"
+
+    - name: "Trapp plan 1"
+      address: "1/1/186"
+      state_address: "1/1/189"
+      brightness_address: "1/1/188"
+      brightness_state_address: "1/1/190"
+
+    - name: "Trapp plan 2"
+      address: "1/1/192"
+      state_address: "1/1/195"
+      brightness_address: "1/1/193"
+      brightness_state_address: "1/1/196"
+
+    ###############################################
+    # LYS i stue 1. etg
+
+    - name: "Alt lys i stue"
+      address: "1/1/42"
+      state_address: "1/1/45"
+      brightness_address: "1/1/44"
+      brightness_state_address: "1/1/47"
+
+    - name: "Alt lys på kjøkken"
+      address: "1/1/84"
+      state_address: "1/1/87"
+      brightness_address: "1/1/86"
+      brightness_state_address: "1/1/88"
+
+    - name: "Stue spotter ved kunst"
+      address: "1/1/48"
+      state_address: "1/1/51"
+      brightness_address: "1/1/50"
+      brightness_state_address: "1/1/52"
+
+    - name: "Stue downlights ved bokhylle"
+      address: "1/1/54"
+      state_address: "1/1/57"
+      brightness_address: "1/1/56"
+      brightness_state_address: "1/1/58"
+
+    - name: "Stue downlights ved daybed"
+      address: "1/1/60"
+      state_address: "1/1/63"
+      brightness_address: "1/1/62"
+      brightness_state_address: "1/1/64"
+
+    - name: "Stue downlight ved trapp"
+      address: "1/1/66"
+      state_address: "1/1/69"
+      brightness_address: "1/1/68"
+      brightness_state_address: "1/1/70"
+
+    ###############################################
+    # Lys på kjøkken i 1. etg
+
+    - name: "Kjøkken downlight sone 1"
+      address: "1/1/90"
+      state_address: "1/1/93"
+      brightness_address: "1/1/92"
+      brightness_state_address: "1/1/94"
+
+    - name: "Kjøkken downlight sone 2"
+      address: "1/1/96"
+      state_address: "1/1/99"
+      brightness_address: "1/1/98"
+      brightness_state_address: "1/1/100"
+
+    - name: "Kjøkken lys benk"
+      address: "1/1/102"
+      state_address: "1/1/105"
+      brightness_address: "1/1/104"
+      brightness_state_address: "1/1/106"
+
+    - name: "Kjøkken spisebord"
+      address: "1/1/108"
+      state_address: "1/1/111"
+      brightness_address: "1/1/110"
+      brightness_state_address: "1/1/112"
+
+    - name: "Kjøkken led list"
+      address: "1/1/114"
+      state_address: "1/1/117"
+      brightness_address: "1/1/116"
+      brightness_state_address: "1/1/118"
+
+    - name: "Kjøkken reserve 2"
+      address: "1/1/126"
+      state_address: "1/1/129"
+      brightness_address: "1/1/128"
+      brightness_state_address: "1/1/130"
+
+    - name: "Kjøkken reserve 1"
+      address: "1/1/120"
+      state_address: "1/1/123"
+      brightness_address: "1/1/121"
+      brightness_state_address: "1/1/124"
+
+
+    #############################################
+    # Lys på kjøkken spiseområde
+
+    - name: "Spisestue downlight sone 1"
+      address: "1/1/138"
+      state_address: "1/1/141"
+      brightness_address: "1/1/140"
+      brightness_state_address: "1/1/142"
+
+    - name: "Spisestue downlight sone 2"
+      address: "1/1/144"
+      state_address: "1/1/147"
+      brightness_address: "1/1/146"
+      brightness_state_address: "1/1/148"
+
+    - name: "Spisestue led list"
+      address: "1/1/150"
+      state_address: "1/1/153"
+      brightness_address: "1/1/152"
+      brightness_state_address: "1/1/154"
+
+    - name: "Spisestue taklys"
+      address: "1/1/156"
+      state_address: "1/1/159"
+      brightness_address: "1/1/158"
+      brightness_state_address: "1/1/160"
+
+    ###############################################
+    # Lys i Entre 1. etg
+
+    - name: "Entre downlights"
+      address: "1/1/6"
+      state_address: "1/1/9"
+      brightness_address: "1/1/8"
+      brightness_state_address: "1/1/10"
+
+    - name: "Entre vegglys"
+      address: "1/1/12"
+      state_address: "1/1/15"
+      brightness_address: "1/1/14"
+      brightness_state_address: "1/1/16"
+
+    - name: "WC-rom taklys"
+      address: "1/1/30"
+      state_address: "1/1/33"
+      brightness_address: "1/1/32"
+      brightness_state_address: "1/1/34"
+
+    - name: "WC-rom speil"
+      address: "1/1/36"
+      state_address: "1/1/39"
+
+    # LYS 2. etg
+
+    ##############################################
+    # Master sov
+
+    - name: "Master sov spotter"
+      address: "1/2/108"
+      state_address: "1/2/111"
+      brightness_address: "1/2/110"
+      brightness_state_address: "1/2/112"
+
+    - name: "Master sov skap Haakon"
+      address: "1/2/120"
+      state_address: "1/2/123"
+      brightness_address: "1/2/122"
+      brightness_state_address: "1/2/124"
+
+    - name: "Master sov skap Katharina"
+      address: "1/2/126"
+      state_address: "1/2/129"
+      brightness_address: "1/2/128"
+      brightness_state_address: "1/2/130"
+
+    ##############################################
+    # Loftstue
+
+    - name: "Loftstue downlights"
+      address: "1/2/6"
+      state_address: "1/2/9"
+      brightness_address: "1/2/8"
+      brightness_state_address: "1/2/10"
+
+    - name: "Loftstue taklys"
+      address: "1/2/12"
+      state_address: "1/2/15"
+      brightness_address: "1/2/14"
+      brightness_state_address: "1/2/16"
+
+    ##############################################
+    # Bad
+    
+    - name: "Bad downlights"
+      address: "1/2/36"
+      state_address: "1/2/39"
+      brightness_address: "1/2/38"
+      brightness_state_address: "1/2/40"
+
+    - name: "Bad speil"
+      address: "1/2/42"
+      state_address: "1/2/45"
+      brightness_address: "1/2/44"
+      brightness_state_address: "1/2/46"
+
+    - name: "Bad dusj"
+      address: "1/2/48"
+      state_address: "1/2/51"
+      brightness_address: "1/2/50"
+      brightness_state_address: "1/2/52"
+
+
+# Config for relays
+  switch:
+
+    - name: "Stikk ved sofa"
+      address: "0/1/0"
+      state_address: "0/1/1"
+
+    - name: "Stikk ved daybed"
+      address: "0/1/2"
+      state_address: "0/1/3"
+
+    - name: "Stikk loftstue"
+      address: "0/1/4"
+      state_address: "0/1/5"
+
+    - name: "Håndkletørkere"
+      address: "0/1/6"
+      state_address: "0/1/7"
+
