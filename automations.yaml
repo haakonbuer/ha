@@ -19,24 +19,6 @@
     target:
       area_id: living_room
   mode: single
-- id: '1708381877754'
-  alias: Tv-tid på kvelden
-  description: Fiks lys for tv på kvelden i helger
-  trigger:
-  - platform: device
-    device_id: 641bcfb246f8306ef68e63cab345ea89
-    domain: media_player
-    entity_id: b83175687683108e9c249cb3417053a5
-    type: turned_on
-  condition:
-  - condition: time
-    after: '19:00:00'
-  action:
-  - service: hue.activate_scene
-    data: {}
-    target:
-      entity_id: scene.upstairs_kosestund
-  mode: single
 - id: '1714078223227'
   alias: Lesestol - skru på når man setter seg ned
   description: ''
@@ -120,6 +102,13 @@
     data: {}
     target:
       area_id: bad
+  - service: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - light.master_sov_extra
+      - light.master_sov_skap_katharina
   mode: single
 - id: '1717104216476'
   alias: Test1

@@ -25,7 +25,8 @@ sensor:
   - name: "Power current"
     state_address: "0/0/103"
     type: electric_current
-      
+
+# KLIMA
 
 climate:
 
@@ -92,6 +93,8 @@ climate:
     temperature_address: "2/2/46"
     target_temperature_address: "2/2/49"
     target_temperature_state_address: "2/2/48"
+
+## LYS
 
 light:
   - name: "Alt lys"
@@ -298,6 +301,36 @@ light:
     state_address: "1/2/129"
     brightness_address: "1/2/128"
     brightness_state_address: "1/2/130"
+
+##############################################
+# SOV 1
+
+  - name: "Soverom 1 downlights"
+    address: "1/2/60"
+    state_address: "1/2/63"
+    brightness_address: "1/2/62"
+    brightness_state_address: "1/2/64"
+
+  - name: "Soverom 1 taklys"
+    address: "1/2/66"
+    state_address: "1/2/69"
+    brightness_address: "1/2/68"
+    brightness_state_address: "1/2/70"
+
+##############################################
+# SOV 2
+
+  - name: "Soverom 2 downlights"
+    address: "1/2/84"
+    state_address: "1/2/87"
+    brightness_address: "1/2/86"
+    brightness_state_address: "1/2/88"
+
+  - name: "Soverom 2 taklys"
+    address: "1/2/90"
+    state_address: "1/2/93"
+    brightness_address: "1/2/92"
+    brightness_state_address: "1/2/94"
 
 ##############################################
 # Loftstue
