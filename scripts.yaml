@@ -81,7 +81,7 @@ light_master_garderobe_on:
         entity_id: "{{ entities }}"
       data:
         transition: 10
-        brightness_pct: 90
+        brightness_pct: 85
 
 light_master_garderobe_off:
   alias: Skru av lys i garderobeskap
