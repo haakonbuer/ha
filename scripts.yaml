@@ -103,8 +103,25 @@ master_bed_spotter_on:
       target:
         entity_id: light.master_sov_spotter
       data:
-        transition: 30
-        brightness_pct: 85
+        brightness_pct: 20
+
+master_bed_spotter_on2:
+  alias: Skru på spotter på master sov 2
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id: light.master_sov_spotter
+      data:
+        brightness_pct: 50
+
+master_bed_spotter_on3:
+  alias: Skru på spotter på master sov 2
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id: light.master_sov_spotter
+      data:
+        brightness_pct: 100
 
 master_bed_spotter_off:
   alias: Skru av spotter på master sov
