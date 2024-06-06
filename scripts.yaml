@@ -95,3 +95,21 @@ light_master_garderobe_off:
         entity_id: "{{ entities }}"
       data:
         transition: 10
+
+master_bed_spotter_on:
+  alias: Skru på spotter på master sov
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id: light.master_sov_spotter
+      data:
+        transition: 30
+
+master_bed_spotter_off:
+  alias: Skru av spotter på master sov
+  sequence:
+    - service: light.turn_off
+      target:
+        entity_id: light.master_sov_spotter
+      data:
+        transition: 30
