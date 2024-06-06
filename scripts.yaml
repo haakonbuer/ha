@@ -48,3 +48,10 @@ god_natt:
   alias: God natt
   sequence: []
   mode: single
+
+hello_world2: 
+  alias: My first script
+  sequence:
+  - service: notify.notify
+    data:
+      message: "Hello World from Haakon"
