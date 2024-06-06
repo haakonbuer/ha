@@ -16,6 +16,7 @@ leave_home:
       message: Sov godt mine venner!
   mode: single
   icon: mdi:exit-run
+
 hello_world:
   alias: Hello World
   sequence:
@@ -24,6 +25,7 @@ hello_world:
       entity_id: scene.kveldskos_i_huset
     data: {}
   mode: single
+
 dra_pa_jobb:
   alias: Dra på jobb
   sequence:
@@ -36,6 +38,7 @@ dra_pa_jobb:
       - 1_etasje
       - 2_etasje
   mode: single
+
 barna_sover:
   alias: Barna sover
   sequence:
@@ -44,6 +47,7 @@ barna_sover:
     target:
       entity_id: scene.kveldskos_i_huset
   mode: single
+
 god_natt:
   alias: God natt
   sequence: []
@@ -64,3 +68,27 @@ bedroom_goodnight:
     - service: notify.notify
       data:
         message: "Lys er skrudd av på soverom"
+
+light_master_garderobe_on:
+  alias: Skru på lys i garderobeskap
+  variables:
+    entities:
+      - light.master_sov_skap_katharina
+      - light.master_sov_skap_haakon
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id: "{{ entities }}"
+      data:
+        brightness: 75
+
+light_master_garderobe_off:
+  alias: Skru på lys i garderobeskap
+  variables:
+    entities:
+      - light.master_sov_skap_katharina
+      - light.master_sov_skap_haakon
+  sequence:
+    - service: light.turn_off
+      target:
+        entity_id: "{{ entities }}"
