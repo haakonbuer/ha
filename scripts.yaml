@@ -74,7 +74,7 @@ light_master_garderobe_on:
   variables:
     entities:
       - light.master_sov_skap_katharina
-      - light.master_sov_skap_haakon
+      - light.master_sov_extra
   sequence:
     - service: light.turn_on
       target:
@@ -83,11 +83,11 @@ light_master_garderobe_on:
         brightness: 75
 
 light_master_garderobe_off:
-  alias: Skru på lys i garderobeskap
+  alias: Skru av lys i garderobeskap
   variables:
     entities:
       - light.master_sov_skap_katharina
-      - light.master_sov_skap_haakon
+      - light.master_sov_extra
   sequence:
     - service: light.turn_off
       target:
