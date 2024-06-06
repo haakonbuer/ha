@@ -96,6 +96,26 @@ light_master_garderobe_off:
       data:
         transition: 10
 
+
+fade_my_light:
+  mode: single
+  sequence:
+    - repeat:
+      count: "9"
+      sequence:
+        - delay:
+          hourse: 0
+          minutes: 0
+          seconds: 10
+        - service: light.turn_on
+          data:
+            brightness_step_pct: 5
+          target:
+            entity_id: light.master_sov_spotter
+
+
+
+
 master_bed_spotter_on:
   alias: Skru på spotter på master sov
   sequence:
