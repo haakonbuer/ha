@@ -104,6 +104,7 @@ master_bed_spotter_on:
         entity_id: light.master_sov_spotter
       data:
         transition: 30
+        brightness_pct: 85
 
 master_bed_spotter_off:
   alias: Skru av spotter på master sov
