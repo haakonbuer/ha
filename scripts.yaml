@@ -104,7 +104,7 @@ fade_my_light:
       count: "9"
       sequence:
         - delay:
-          hourse: 0
+          hours: 0
           minutes: 0
           seconds: 10
         - service: light.turn_on
