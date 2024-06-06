@@ -55,3 +55,12 @@ hello_world2:
   - service: notify.notify
     data:
       message: "Hello World from Haakon"
+
+bedroom_goodnight:
+  alias: Skru av soverom
+  sequence:
+    - service: light.turn_off
+      entity_id: light.master_sov_spotter
+    - service: notify.notify
+      data:
+        message: "Lys er skrudd av på soverom"
