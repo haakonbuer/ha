@@ -151,3 +151,31 @@ master_bed_spotter_off:
         entity_id: light.master_sov_spotter
       data:
         transition: 30
+
+
+skru_av_forste_etg:
+  mode: single
+  alias: Skru av lys i 1. etg
+  sequence:
+    - service: light.turn_off
+      target:
+        floor_id:
+          - 1_etasje
+
+skru_av_andre_etg:
+  mode: single
+  alias: Skru av lys i 2. etg
+  sequence:
+    - service: light.turn_off
+      target:
+        floor_id:
+          - 2_etasje
+
+skru_av_kjeller:
+  mode: single
+  alias: Skru av lys i kjeller
+  sequence:
+    - service: light.turn_off
+      target:
+        floor_id:
+          - kjeller
