@@ -16,7 +16,6 @@ leave_home:
       message: Sov godt mine venner!
   mode: single
   icon: mdi:exit-run
-
 hello_world:
   alias: Hello World
   sequence:
@@ -25,7 +24,6 @@ hello_world:
       entity_id: scene.kveldskos_i_huset
     data: {}
   mode: single
-
 dra_pa_jobb:
   alias: Dra på jobb
   sequence:
@@ -37,8 +35,21 @@ dra_pa_jobb:
       - kjeller
       - 1_etasje
       - 2_etasje
+  - service: media_player.media_stop
+    metadata: {}
+    data: {}
+    target:
+      device_id:
+      - e01ee90accf18484bd5670293fc2e608
+      - 1ce5b7b244ad0e2b2d54bfe74e94a72b
+      - 10a3030318c00059f31806e61a34ea9b
+      - c99dc4c9b85e7bc3be98d52c2024388d
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.status
+    data:
+      option: Away
   mode: single
-
 barna_sover:
   alias: Barna sover
   sequence:
@@ -47,135 +58,127 @@ barna_sover:
     target:
       entity_id: scene.kveldskos_i_huset
   mode: single
-
 god_natt:
   alias: God natt
   sequence: []
   mode: single
-
-hello_world2: 
+hello_world2:
   alias: My first script
   sequence:
   - service: notify.notify
     data:
-      message: "Hello World from Haakon"
-
+      message: Hello World from Haakon
 bedroom_goodnight:
   alias: Skru av soverom
   sequence:
-    - service: light.turn_off
-      entity_id: light.master_sov_spotter
-    - service: notify.notify
-      data:
-        message: "Lys er skrudd av på soverom"
-
+  - service: light.turn_off
+    entity_id: light.master_sov_spotter
+  - service: notify.notify
+    data:
+      message: Lys er skrudd av på soverom
 light_master_garderobe_on:
   alias: Skru på lys i garderobeskap
   variables:
     entities:
-      - light.master_sov_skap_katharina
-      - light.master_sov_extra
+    - light.master_sov_skap_katharina
+    - light.master_sov_extra
   sequence:
-    - service: light.turn_on
-      target:
-        entity_id: "{{ entities }}"
-      data:
-        transition: 10
-        brightness_pct: 85
-
+  - service: light.turn_on
+    target:
+      entity_id: '{{ entities }}'
+    data:
+      transition: 10
+      brightness_pct: 85
 light_master_garderobe_off:
   alias: Skru av lys i garderobeskap
   variables:
     entities:
-      - light.master_sov_skap_katharina
-      - light.master_sov_extra
+    - light.master_sov_skap_katharina
+    - light.master_sov_extra
   sequence:
-    - service: light.turn_off
-      target:
-        entity_id: "{{ entities }}"
-      data:
-        transition: 10
-
-
+  - service: light.turn_off
+    target:
+      entity_id: '{{ entities }}'
+    data:
+      transition: 10
 fade_my_light:
   mode: single
   sequence:
-    - repeat:
-        count: "20"
-        sequence:
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 5
-          - service: light.turn_on
-            data:
-              brightness_step: 5
-            target:
-              entity_id: light.master_sov_spotter
-
-
-
-
+  - repeat:
+      count: '20'
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 5
+      - service: light.turn_on
+        data:
+          brightness_step: 5
+        target:
+          entity_id: light.master_sov_spotter
 master_bed_spotter_on:
   alias: Skru på spotter på master sov
   sequence:
-    - service: light.turn_on
-      target:
-        entity_id: light.master_sov_spotter
-      data:
-        brightness_pct: 20
-
+  - service: light.turn_on
+    target:
+      entity_id: light.master_sov_spotter
+    data:
+      brightness_pct: 20
 master_bed_spotter_on2:
   alias: Skru på spotter på master sov 2
   sequence:
-    - service: light.turn_on
-      target:
-        entity_id: light.master_sov_spotter
-      data:
-        brightness_pct: 50
-
+  - service: light.turn_on
+    target:
+      entity_id: light.master_sov_spotter
+    data:
+      brightness_pct: 50
 master_bed_spotter_on3:
   alias: Skru på spotter på master sov 2
   sequence:
-    - service: light.turn_on
-      target:
-        entity_id: light.master_sov_spotter
-      data:
-        brightness_pct: 100
-
+  - service: light.turn_on
+    target:
+      entity_id: light.master_sov_spotter
+    data:
+      brightness_pct: 100
 master_bed_spotter_off:
   alias: Skru av spotter på master sov
   sequence:
-    - service: light.turn_off
-      target:
-        entity_id: light.master_sov_spotter
-      data:
-        transition: 30
-
-
+  - service: light.turn_off
+    target:
+      entity_id: light.master_sov_spotter
+    data:
+      transition: 30
 skru_av_forste_etg:
   mode: single
   alias: Skru av lys i 1. etg
   sequence:
-    - service: light.turn_off
-      target:
-        floor_id:
-          - 1_etasje
-
+  - service: light.turn_off
+    target:
+      floor_id:
+      - 1_etasje
 skru_av_andre_etg:
   mode: single
   alias: Skru av lys i 2. etg
   sequence:
-    - service: light.turn_off
-      target:
-        floor_id:
-          - 2_etasje
-
+  - service: light.turn_off
+    target:
+      floor_id:
+      - 2_etasje
 skru_av_kjeller:
   mode: single
   alias: Skru av lys i kjeller
   sequence:
-    - service: light.turn_off
-      target:
-        floor_id:
-          - kjeller
+  - service: light.turn_off
+    target:
+      floor_id:
+      - kjeller
+kitchen_off:
+  alias: Kitchen off
+  sequence:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      area_id: kitchen
+  description: Script which turns off kitchen area lights
+  icon: mdi:fridge

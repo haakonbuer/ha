@@ -198,34 +198,34 @@
     light.stue_downlights_1:
       supported_color_modes:
       - brightness
-      friendly_name: Stue spotter ved kunst
-      supported_features: 0
       color_mode: brightness
       brightness: 76
+      friendly_name: Stue spotter ved kunst
+      supported_features: 0
       state: 'on'
     light.stue_dw3:
       supported_color_modes:
       - brightness
-      friendly_name: Stue downlights ved daybed
-      supported_features: 0
       color_mode: brightness
       brightness: 128
+      friendly_name: Stue downlights ved daybed
+      supported_features: 0
       state: 'on'
     light.stue_dow2:
       supported_color_modes:
       - brightness
-      friendly_name: Stue downlights ved bokhylle
-      supported_features: 0
       color_mode: brightness
       brightness: 128
+      friendly_name: Stue downlights ved bokhylle
+      supported_features: 0
       state: 'on'
     light.stue_dw4:
       supported_color_modes:
       - brightness
-      friendly_name: Stue downlight ved trapp
-      supported_features: 0
       color_mode: brightness
       brightness: 128
+      friendly_name: Stue downlight ved trapp
+      supported_features: 0
       state: 'on'
     light.hue_bloom_1:
       min_color_temp_kelvin: 2000
@@ -240,15 +240,15 @@
       color_temp_kelvin:
       color_temp:
       hs_color:
-      - 39.416
-      - 53.725
+      - 40.144
+      - 54.51
       rgb_color:
       - 255
-      - 208
-      - 118
+      - 209
+      - 116
       xy_color:
-      - 0.4577
-      - 0.4142
+      - 0.4578
+      - 0.4168
       mode: normal
       dynamics: none
       friendly_name: Hue bloom 1
@@ -267,19 +267,33 @@
       color_temp_kelvin:
       color_temp:
       hs_color:
-      - 39.416
-      - 53.725
+      - 40.144
+      - 54.51
       rgb_color:
       - 255
-      - 208
-      - 118
+      - 209
+      - 116
       xy_color:
-      - 0.4577
-      - 0.4142
+      - 0.4578
+      - 0.4168
       mode: normal
       dynamics: none
       friendly_name: Hue bloom 2
       supported_features: 40
+      state: 'on'
+    light.hue_white_lamp_7:
+      effect_list:
+      - None
+      - candle
+      supported_color_modes:
+      - brightness
+      effect: None
+      color_mode: brightness
+      brightness: 128
+      mode: normal
+      dynamics: none
+      friendly_name: PH louis
+      supported_features: 44
       state: 'on'
   metadata:
     light.stue_downlights_1:
@@ -293,4 +307,6 @@
     light.hue_bloom_1:
       entity_only: true
     light.hue_bloom_2:
+      entity_only: true
+    light.hue_white_lamp_7:
       entity_only: true

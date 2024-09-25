@@ -5,6 +5,13 @@ expose:
     entity_id: sensor.knxTemp1
     address: "2/1/2"
 
+number:
+
+  - name: "Master sov bryter LED %"
+    address: "1/2/140"
+    type: percent
+    step: 10
+
 sensor:
   - name: "Gang varmepådrag"
     state_address: "2/0/0"
@@ -371,6 +378,17 @@ light:
 
 # Config for relays
 switch:
+  - name: "Master sov bryter TA"
+    address: "1/2/141"
+
+  - name: "Master sov LED L2 Green"
+    address: "1/2/138"
+
+  - name: "Master sov LED L2 Blue"
+    address: "1/2/139"
+
+  - name: "Entre bryter knapp 3"
+    address: "1/1/198"
 
   - name: "Stikk ved sofa"
     address: "0/1/0"
@@ -387,4 +405,8 @@ switch:
   - name: "Håndkletørkere"
     address: "0/1/6"
     state_address: "0/1/7"
+
+  - name: "Utelys"
+    address: "0/0/10"
+    state_address: "0/0/11"
 

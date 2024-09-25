@@ -32,7 +32,8 @@
   action:
   - service: light.turn_on
     metadata: {}
-    data: {}
+    data:
+      brightness_pct: 100
     target:
       device_id: 39cb21429aa12722dbce1862c8f5323e
   mode: single
@@ -88,27 +89,52 @@
   trigger:
   - platform: time
     at: 07:00:00
-  condition: []
+  condition:
+  - condition: state
+    entity_id: binary_sensor.workday_sensor
+    state: 'on'
   action:
-  - service: light.turn_on
-    metadata: {}
-    data: {}
+  - metadata: {}
+    data:
+      brightness_pct: 100
     target:
       area_id:
       - kitchen
       - trapp
-  - service: light.turn_on
-    metadata: {}
-    data: {}
+      - living_room
+    action: light.turn_on
+  - metadata: {}
+    data:
+      brightness_pct: 100
     target:
       area_id: bad
-  - service: light.turn_on
+    action: light.turn_on
+  - metadata: {}
+    data:
+      transition: 600
+      brightness_pct: 75
+    target:
+      device_id: 998df95f879649692a35225f00803dc3
+    action: light.turn_on
+  - action: light.turn_on
     metadata: {}
-    data: {}
+    data:
+      brightness_pct: 100
+    target:
+      area_id: entrance
+  - delay:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+  - action: light.turn_on
+    metadata: {}
+    data:
+      brightness_pct: 50
     target:
       entity_id:
-      - light.master_sov_extra
-      - light.master_sov_skap_katharina
+      - light.soverom_2_downlights
+      - light.soverom_1_downlights
   mode: single
 - id: '1717104216476'
   alias: Test1
@@ -124,3 +150,154 @@
     target:
       entity_id: scene.kveldskos_i_huset
   mode: single
+- id: '1718191796482'
+  alias: Vaskerom - sync off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.kjellergang
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - service: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.vaskerom
+  mode: single
+- id: '1718191836396'
+  alias: Vaskerom - sync on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.kjellergang
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.vaskerom
+  mode: single
+- id: '1720042634381'
+  alias: Dra på jobb
+  description: ''
+  trigger:
+  - platform: time
+    at: 09:00:00
+  condition:
+  - condition: state
+    entity_id: binary_sensor.workday_sensor
+    state: 'on'
+  action:
+  - metadata: {}
+    data: {}
+    target:
+      floor_id:
+      - kjeller
+      - 1_etasje
+      - 2_etasje
+    action: light.turn_off
+  - metadata: {}
+    data: {}
+    target:
+      device_id: e01ee90accf18484bd5670293fc2e608
+    action: media_player.media_stop
+  mode: single
+- id: '1725914676383'
+  alias: Utelys på kveld
+  description: Utendørslys på om kvelden
+  trigger:
+  - platform: numeric_state
+    entity_id: sun.sun
+    attribute: elevation
+    below: -4
+  condition: []
+  action:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.utelys
+    data: {}
+  mode: single
+- id: '1725915279630'
+  alias: Utelys av morgen
+  description: Skrur av utelyset når solen står opp
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: 0
+  condition: []
+  action:
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.utelys
+  mode: single
+- id: '1725915955893'
+  alias: Barnerom kveld
+  description: ''
+  trigger:
+  - platform: time
+    at: '18:00:00'
+  condition: []
+  action:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      brightness_pct: 75
+    target:
+      entity_id:
+      - light.soverom_1_downlights
+      - light.soverom_2_downlights
+  - action: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - light.soverom_1_taklys
+      - light.soverom_2_taklys
+  - action: light.turn_on
+    metadata: {}
+    data:
+      kelvin: 2709
+    target:
+      entity_id: light.hannahs_room
+  mode: single
+- id: '1725996215582'
+  alias: Lys lekestua
+  description: ''
+  use_blueprint:
+    path: Blackshome/sensor-light.yaml
+    input:
+      motion_trigger:
+      - binary_sensor.hms_soverom_motion
+      light_switch:
+        entity_id:
+        - light.loftstue_downlights
+        - light.loftstue_taklys
+      time_delay: 10
+      ambient_light_sensor: sensor.hms_soverom_illuminance
+      include_ambient: ambient_enabled
+      include_night_lights: night_lights_enabled
+      night_lights_conditions:
+      - time_enabled
+      night_lights_after_time: '23:30:00'
+      night_lights_before_time: 06:00:00
+      night_lights:
+        entity_id: light.loftstue_downlights
+      night_time_delay: 3
+      include_night_light_control:
+      - use_brightness
+      - if_lights_are_on_adjust_when_crossing_over
+      include_light_control:
+      - use_brightness
+      light_brightness: 60
+      include_time: time_enabled
+      after_time: '21:00:00'
+      before_time: '19:00:00'
