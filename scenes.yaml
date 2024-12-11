@@ -310,3 +310,613 @@
       entity_only: true
     light.hue_white_lamp_7:
       entity_only: true
+- id: '1729411899028'
+  name: Kjøkken kveld
+  entities:
+    light.kjokken_downlight_sone_1:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkken downlight sone 1
+      supported_features: 0
+      color_mode: brightness
+      brightness: 128
+      state: 'on'
+    light.kjokken_downlight_sone_2:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkken downlight sone 2
+      supported_features: 0
+      color_mode: brightness
+      brightness: 128
+      state: 'on'
+    light.kjokken_spisebord:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkkenøy
+      supported_features: 0
+      color_mode: brightness
+      brightness: 33
+      state: 'on'
+    light.kjokken_lys_benk:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkken lys benk
+      supported_features: 0
+      color_mode: brightness
+      brightness: 128
+      state: 'on'
+    light.kjokken_led_list:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkken led list
+      supported_features: 0
+      color_mode: brightness
+      brightness: 104
+      state: 'on'
+    light.spisestue_downlight_sone_2:
+      supported_color_modes:
+      - brightness
+      icon: mdi:spotlight-beam
+      friendly_name: Spotter nord
+      supported_features: 0
+      color_mode: brightness
+      brightness: 128
+      state: 'on'
+    light.spisestue_downlight_sone_1:
+      supported_color_modes:
+      - brightness
+      icon: mdi:spotlight-beam
+      friendly_name: Spotter sør
+      supported_features: 0
+      color_mode: brightness
+      brightness: 128
+      state: 'on'
+    light.spisestue_led_list:
+      supported_color_modes:
+      - brightness
+      friendly_name: Spisestue led list
+      supported_features: 0
+      color_mode: brightness
+      brightness: 104
+      state: 'on'
+    light.spisestue_taklys:
+      supported_color_modes:
+      - brightness
+      friendly_name: Spisestue taklys
+      supported_features: 0
+      color_mode: brightness
+      brightness: 102
+      state: 'on'
+  icon: mdi:glass-wine
+  metadata:
+    light.kjokken_downlight_sone_1:
+      entity_only: true
+    light.kjokken_downlight_sone_2:
+      entity_only: true
+    light.kjokken_spisebord:
+      entity_only: true
+    light.kjokken_lys_benk:
+      entity_only: true
+    light.kjokken_led_list:
+      entity_only: true
+    light.spisestue_downlight_sone_2:
+      entity_only: true
+    light.spisestue_downlight_sone_1:
+      entity_only: true
+    light.spisestue_led_list:
+      entity_only: true
+    light.spisestue_taklys:
+      entity_only: true
+- id: '1729415861703'
+  name: TV Stua Kveld
+  entities:
+    light.hue_white_lamp_7:
+      effect_list:
+      - None
+      - candle
+      supported_color_modes:
+      - brightness
+      effect: None
+      color_mode: brightness
+      brightness: 153
+      mode: normal
+      dynamics: none
+      friendly_name: PH louis
+      supported_features: 44
+      state: 'on'
+    light.hue_bloom_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - xy
+      friendly_name: Hue bloom 1
+      supported_features: 40
+      color_mode: xy
+      brightness: 144
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 39.218
+      - 70.196
+      rgb_color:
+      - 255
+      - 193
+      - 76
+      xy_color:
+      - 0.502
+      - 0.4263
+      mode: normal
+      dynamics: none
+      state: 'on'
+    light.hue_bloom_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 144
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 39.218
+      - 70.196
+      rgb_color:
+      - 255
+      - 193
+      - 76
+      xy_color:
+      - 0.502
+      - 0.4263
+      mode: normal
+      dynamics: none
+      friendly_name: Hue bloom 2
+      supported_features: 40
+      state: 'on'
+    light.stue_downlights_1:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 89
+      friendly_name: Stue spotter ved kunst
+      supported_features: 0
+      state: 'on'
+    switch.stikk_ved_sofa:
+      friendly_name: Stikk ved sofa
+      state: 'off'
+    light.lightstrip_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - None
+      - candle
+      - fire
+      - prism
+      - sparkle
+      - opal
+      - glisten
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: None
+      color_mode: color_temp
+      brightness: 143
+      color_temp_kelvin: 2732
+      color_temp: 366
+      hs_color:
+      - 28.327
+      - 64.71
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      mode: normal
+      dynamics: none
+      friendly_name: Lightstrip 2
+      supported_features: 44
+      state: 'on'
+  icon: mdi:television
+  metadata:
+    light.hue_white_lamp_7:
+      entity_only: true
+    light.hue_bloom_1:
+      entity_only: true
+    light.hue_bloom_2:
+      entity_only: true
+    light.stue_downlights_1:
+      entity_only: true
+    switch.stikk_ved_sofa:
+      entity_only: true
+    light.lightstrip_2:
+      entity_only: true
+- id: '1729417391182'
+  name: TV Stua Dag
+  entities:
+    light.hue_white_lamp_7:
+      effect_list:
+      - None
+      - candle
+      supported_color_modes:
+      - brightness
+      friendly_name: PH louis
+      supported_features: 44
+      state: unavailable
+    light.hue_bloom_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 230
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 36.201
+      - 70.196
+      rgb_color:
+      - 255
+      - 184
+      - 76
+      xy_color:
+      - 0.5137
+      - 0.415
+      mode: normal
+      dynamics: none
+      friendly_name: Hue bloom 1
+      supported_features: 40
+      state: 'on'
+    light.hue_bloom_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 204
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 34.483
+      - 68.235
+      rgb_color:
+      - 255
+      - 181
+      - 81
+      xy_color:
+      - 0.514
+      - 0.409
+      mode: normal
+      dynamics: none
+      friendly_name: Hue bloom 2
+      supported_features: 40
+      state: 'on'
+    light.stue_downlights_1:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      friendly_name: Stue spotter ved kunst
+      supported_features: 0
+      state: 'on'
+    switch.stikk_ved_sofa:
+      friendly_name: Stikk ved sofa
+      state: 'on'
+    light.leselys_stua:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - None
+      - candle
+      - fire
+      - prism
+      - sparkle
+      - opal
+      - glisten
+      - unknown
+      - unknown
+      - unknown
+      - unknown
+      - sunrise
+      - sunset
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: None
+      color_mode: color_temp
+      brightness: 204
+      color_temp_kelvin: 2732
+      color_temp: 366
+      hs_color:
+      - 28.327
+      - 64.71
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      mode: normal
+      dynamics: none
+      friendly_name: Leselys stua
+      supported_features: 44
+      state: 'on'
+  icon: mdi:television
+  metadata:
+    light.hue_white_lamp_7:
+      entity_only: true
+    light.hue_bloom_1:
+      entity_only: true
+    light.hue_bloom_2:
+      entity_only: true
+    light.stue_downlights_1:
+      entity_only: true
+    switch.stikk_ved_sofa:
+      entity_only: true
+    light.leselys_stua:
+      entity_only: true
+- id: '1729452529038'
+  name: Movie time
+  entities:
+    light.hue_white_lamp_7:
+      effect_list:
+      - None
+      - candle
+      supported_color_modes:
+      - brightness
+      effect: None
+      color_mode: brightness
+      brightness: 76
+      mode: normal
+      dynamics: none
+      friendly_name: PH louis
+      supported_features: 44
+      state: 'on'
+    light.hue_bloom_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 144
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 37.931
+      - 68.235
+      rgb_color:
+      - 255
+      - 191
+      - 81
+      xy_color:
+      - 0.502
+      - 0.4204
+      mode: normal
+      dynamics: none
+      friendly_name: Hue bloom 1
+      supported_features: 40
+      state: 'on'
+    light.hue_bloom_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 144
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 37.931
+      - 68.235
+      rgb_color:
+      - 255
+      - 191
+      - 81
+      xy_color:
+      - 0.502
+      - 0.4204
+      mode: normal
+      dynamics: none
+      friendly_name: Hue bloom 2
+      supported_features: 40
+      state: 'on'
+    light.stue_downlights_1:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      friendly_name: Stue spotter ved kunst
+      supported_features: 0
+      state: 'off'
+    switch.stikk_ved_sofa:
+      friendly_name: Stikk ved sofa
+      state: 'off'
+    light.leselys_stua:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - None
+      - candle
+      - fire
+      - prism
+      - sparkle
+      - opal
+      - glisten
+      - unknown
+      - unknown
+      - unknown
+      - unknown
+      - sunrise
+      - sunset
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect:
+      color_mode:
+      brightness:
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      rgb_color:
+      xy_color:
+      mode: normal
+      dynamics: none
+      friendly_name: Leselys stua
+      supported_features: 44
+      state: 'off'
+    light.stue_dow2:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      friendly_name: Stue downlights ved bokhylle
+      supported_features: 0
+      state: 'off'
+    light.stue_dw3:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      friendly_name: Stue downlights ved daybed
+      supported_features: 0
+      state: 'off'
+  icon: mdi:theater
+  metadata:
+    light.hue_white_lamp_7:
+      entity_only: true
+    light.hue_bloom_1:
+      entity_only: true
+    light.hue_bloom_2:
+      entity_only: true
+    light.stue_downlights_1:
+      entity_only: true
+    switch.stikk_ved_sofa:
+      entity_only: true
+    light.leselys_stua:
+      entity_only: true
+    light.stue_dow2:
+      entity_only: true
+    light.stue_dw3:
+      entity_only: true
+- id: '1729459826563'
+  name: Kjøkken dag
+  entities:
+    light.kjokken_downlight_sone_1:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkken downlight sone 1
+      supported_features: 0
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+    light.kjokken_downlight_sone_2:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkken downlight sone 2
+      supported_features: 0
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+    light.kjokken_spisebord:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkkenøy
+      supported_features: 0
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+    light.kjokken_lys_benk:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkken lys benk
+      supported_features: 0
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+    light.kjokken_led_list:
+      supported_color_modes:
+      - brightness
+      friendly_name: Kjøkken led list
+      supported_features: 0
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+    light.spisestue_downlight_sone_2:
+      supported_color_modes:
+      - brightness
+      icon: mdi:spotlight-beam
+      friendly_name: Spotter nord
+      supported_features: 0
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+    light.spisestue_downlight_sone_1:
+      supported_color_modes:
+      - brightness
+      icon: mdi:spotlight-beam
+      friendly_name: Spotter sør
+      supported_features: 0
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+    light.spisestue_led_list:
+      supported_color_modes:
+      - brightness
+      friendly_name: Spisestue led list
+      supported_features: 0
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+    light.spisestue_taklys:
+      supported_color_modes:
+      - brightness
+      friendly_name: Spisestue taklys
+      supported_features: 0
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+  icon: mdi:stove
+  metadata:
+    light.kjokken_downlight_sone_1:
+      entity_only: true
+    light.kjokken_downlight_sone_2:
+      entity_only: true
+    light.kjokken_spisebord:
+      entity_only: true
+    light.kjokken_lys_benk:
+      entity_only: true
+    light.kjokken_led_list:
+      entity_only: true
+    light.spisestue_downlight_sone_2:
+      entity_only: true
+    light.spisestue_downlight_sone_1:
+      entity_only: true
+    light.spisestue_led_list:
+      entity_only: true
+    light.spisestue_taklys:
+      entity_only: true

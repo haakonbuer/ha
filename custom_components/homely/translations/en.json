@@ -1,0 +1,29 @@
+{
+    "config": {
+      "step": {
+        "user": {
+          "title": "Homely",
+          "description": "Fill in your Homely login information. This is the same as used in the app.",
+          "data": {
+            "username": "Username",
+            "password": "Password"
+          }
+        },
+        "location":{
+            "title":"Homely location",
+            "description":"Select your desired location",
+            "data":{
+              "location": "Homely location"
+            }
+        }
+      },
+      "error": {
+        "cannot_connect": "Cannot connect to the Homely service.",
+        "invalid_auth": "Failed to authenticate with the Homely service.",
+        "unknown": "An unknown error occurred."
+      },
+      "abort": {
+        "already_configured": "This Homely location has already been configured."
+      }
+    }
+  }

@@ -12,10 +12,94 @@ number:
     type: percent
     step: 10
 
-sensor:
-  - name: "Gang varmepådrag"
-    state_address: "2/0/0"
+  - name: "Bryter ved trapp LED %"
+    address: "3/1/0"
     type: percent
+    step: 10
+
+  - name: "Bryter stue LED %"
+    address: "3/1/4"
+    type: percent
+    step: 10
+      
+  - name: "Bryter stue kjøkken LED %"
+    address: "3/1/7"
+    type: percent
+    step: 10
+
+  - name: "Bryter stue TV LED %"
+    address: "3/1/9"
+    type: percent
+    step: 10
+
+binary_sensor:
+  - name: "Bryter ved trapp VK1T"
+    state_address: "3/1/10"
+    reset_after: 5
+    sync_state: False
+      
+  - name: "Bryter ved trapp VKT2"
+    state_address: "3/1/23"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter ved trapp VKB1"
+    state_address: "3/1/11"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter ved trapp VKB2"
+    state_address: "3/1/12"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - VKT"
+    state_address: "3/1/13"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - VKT2"
+    state_address: "3/1/15"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - VKB"
+    state_address: "3/1/14"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - VKB2"
+    state_address: "3/1/16"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - HKT1"
+    state_address: "3/1/19"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - HKT2"
+    state_address: "3/1/20"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - HKB1"
+    state_address: "3/1/21"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - HKB2"
+    state_address: "3/1/22"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Varmepådrag vaskerom elektrisk"
+    state_address: "2/0/31"
+
+  - name: "Varmepådrag master bad"
+    state_address: "2/2/17"
+
+sensor:
 
   - name: "Vaskerom gulvtemp"
     state_address: "2/0/25"
@@ -24,6 +108,82 @@ sensor:
   - name: "Vaskerom lufttemp"
     state_address: "2/0/24"
     type: temperature
+      
+  - name: "Bryter ved trapp - temperatur"
+    state_address: "3/1/1"
+    type: temperature
+
+  - name: "Bryter stue - temperatur"
+    state_address: "3/1/3"
+    type: temperature
+
+  - name: "Bryter stue kjøkken - temperatur"
+    state_address: "2/1/14"
+    type: temperature
+
+  - name: "Master bad gulvtemp"
+    state_address: "2/2/14"
+    type: temperature
+
+  - name: "Master bad lufttemp"
+    state_address: "2/2/13"
+    type: temperature
+
+  - name: "Loftstue temperatur"
+    state_address: "2/2/2"
+    type: temperature
+
+  - name: "Master sov temperatur"
+    state_address: "2/2/46"
+    type: temperature
+
+  - name: "Sov 1 temperatur"
+    state_address: "2/2/24"
+    type: temperature
+
+  - name: "Sov 2 temperatur"
+    state_address: "2/2/35"
+    type: temperature
+
+  - name: "Varmepådrag loftstue"
+    state_address: "2/2/6"
+    type: percent
+
+  - name: "Varmepådrag kjellergang"
+    state_address: "2/0/6"
+    type: percent
+
+  - name: "Varmepådrag kjellerstue"
+    state_address: "2/0/17"
+    type: percent
+
+  - name: "Varmepådrag vaskerom"
+    state_address: "2/0/28"
+    type: percent
+
+  - name: "Varmepådrag master sov"
+    state_address: "2/2/50"
+    type: percent
+
+  - name: "Varmepådrag sov 1"
+    state_address: "2/2/28"
+    type: percent
+
+  - name: "Varmepådrag sov 2"
+    state_address: "2/2/39"
+    type: percent
+
+  - name: "Varmepådrag entre"
+    state_address: "2/1/6"
+    type: percent
+
+  - name: "Varmepådrag stue"
+    state_address: "2/1/17"
+    type: percent
+
+  - name: "Varmepådrag kjøkken"
+    state_address: "2/1/28"
+    type: percent
 
   - name: "Power potential"
     state_address: "0/0/102"
@@ -131,23 +291,12 @@ light:
 ###############################################
 # Lys i trapp
 
-  - name: "Trapp taklys"
-    address: "1/1/180"
-    state_address: "1/1/183"
-    brightness_address: "1/1/181"
-    brightness_state_address: "1/1/184"
+#  - name: "Trapp taklys"
+#    address: "1/1/180"
+#    state_address: "1/1/183"
+#    brightness_address: "1/1/181"
+#    brightness_state_address: "1/1/184"
 
-  - name: "Trapp plan 1"
-    address: "1/1/186"
-    state_address: "1/1/189"
-    brightness_address: "1/1/188"
-    brightness_state_address: "1/1/190"
-
-  - name: "Trapp plan 2"
-    address: "1/1/192"
-    state_address: "1/1/195"
-    brightness_address: "1/1/193"
-    brightness_state_address: "1/1/196"
 
 ###############################################
 # LYS i stue 1. etg
@@ -270,21 +419,11 @@ light:
     brightness_address: "1/1/8"
     brightness_state_address: "1/1/10"
 
-  - name: "Entre vegglys"
-    address: "1/1/12"
-    state_address: "1/1/15"
-    brightness_address: "1/1/14"
-    brightness_state_address: "1/1/16"
-
   - name: "WC-rom taklys"
     address: "1/1/30"
     state_address: "1/1/33"
     brightness_address: "1/1/32"
     brightness_state_address: "1/1/34"
-
-  - name: "WC-rom speil"
-    address: "1/1/36"
-    state_address: "1/1/39"
 
 # LYS 2. etg
 
@@ -321,8 +460,6 @@ light:
   - name: "Soverom 1 taklys"
     address: "1/2/66"
     state_address: "1/2/69"
-    brightness_address: "1/2/68"
-    brightness_state_address: "1/2/70"
 
 ##############################################
 # SOV 2
@@ -336,8 +473,6 @@ light:
   - name: "Soverom 2 taklys"
     address: "1/2/90"
     state_address: "1/2/93"
-    brightness_address: "1/2/92"
-    brightness_state_address: "1/2/94"
 
 ##############################################
 # Loftstue
@@ -378,8 +513,27 @@ light:
 
 # Config for relays
 switch:
+  - name: "Tvangskjøring varme"
+    address: "0/0/200"
+
+  - name: "Tvangskjøring varme 2.etg"
+    address: "0/0/202"
+
   - name: "Master sov bryter TA"
     address: "1/2/141"
+
+  - name: "Bryter ved trapp TA"
+    address: "3/1/2"
+
+
+  - name: "Bryter stue TA"
+    address: "3/1/5"
+
+  - name: "Bryter stue kjøkken TA"
+    address: "3/1/6"
+
+  - name: "Bryter stue TV TA"
+    address: "3/1/8"
 
   - name: "Master sov LED L2 Green"
     address: "1/2/138"
@@ -387,7 +541,7 @@ switch:
   - name: "Master sov LED L2 Blue"
     address: "1/2/139"
 
-  - name: "Entre bryter knapp 3"
+  - name: "Entre bryter knapp 3 - MASTER PÅ/AV"
     address: "1/1/198"
 
   - name: "Stikk ved sofa"
@@ -406,7 +560,24 @@ switch:
     address: "0/1/6"
     state_address: "0/1/7"
 
+# Regular on/off lights
   - name: "Utelys"
     address: "0/0/10"
     state_address: "0/0/11"
+
+  - name: "Trapp plan 1"
+    address: "1/1/186"
+    state_address: "1/1/189"
+
+  - name: "Trapp plan 2"
+    address: "1/1/192"
+    state_address: "1/1/195"
+
+  - name: "Entre vegglys"
+    address: "1/1/12"
+    state_address: "1/1/15"
+
+  - name: "WC-rom speil"
+    address: "1/1/36"
+    state_address: "1/1/39"
 

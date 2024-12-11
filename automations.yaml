@@ -58,14 +58,16 @@
   alias: WC-rom - Lys ved bevegelse
   description: Skrur på lys på WC rom
   use_blueprint:
-    path: homeassistant/motion_light.yaml
+    path: Blackshome/sensor-light.yaml
     input:
-      motion_entity: binary_sensor.hue_motion_sensor_1_motion
-      light_target:
+      motion_trigger:
+      - binary_sensor.hue_motion_sensor_1_motion
+      light_switch:
         entity_id:
-        - light.wc_rom_speil
+        - switch.wc_rom_speil
         - light.wc_rom_taklys
-      no_motion_wait: 600
+      include_light_control:
+      - use_brightness
 - id: '1716889490904'
   alias: Skru av lys om kvelden
   description: ''
@@ -74,26 +76,33 @@
     at: 00:30:00
   condition: []
   action:
-  - service: light.turn_off
-    metadata: {}
+  - metadata: {}
     data: {}
     target:
       floor_id:
       - kjeller
       - 1_etasje
       - 2_etasje
+    action: light.turn_off
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      floor_id:
+      - 1_etasje
+      - 2_etasje
   mode: single
 - id: '1717103865567'
   alias: Good morning
   description: ''
-  trigger:
-  - platform: time
-    at: 07:00:00
-  condition:
+  triggers:
+  - at: 07:00:00
+    trigger: time
+  conditions:
   - condition: state
     entity_id: binary_sensor.workday_sensor
     state: 'on'
-  action:
+  actions:
   - metadata: {}
     data:
       brightness_pct: 100
@@ -102,7 +111,16 @@
       - kitchen
       - trapp
       - living_room
+      - entrance
     action: light.turn_on
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.trapp_plan_1
+      - switch.trapp_plan_2
+      - switch.entre_vegglys
   - metadata: {}
     data:
       brightness_pct: 100
@@ -124,13 +142,39 @@
       area_id: entrance
   - delay:
       hours: 0
-      minutes: 15
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - action: light.turn_on
+    metadata: {}
+    data:
+      brightness_pct: 25
+    target:
+      entity_id:
+      - light.soverom_2_downlights
+      - light.soverom_1_downlights
+  - delay:
+      hours: 0
+      minutes: 5
       seconds: 0
       milliseconds: 0
   - action: light.turn_on
     metadata: {}
     data:
       brightness_pct: 50
+    target:
+      entity_id:
+      - light.soverom_2_downlights
+      - light.soverom_1_downlights
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - action: light.turn_on
+    metadata: {}
+    data:
+      brightness_pct: 75
     target:
       entity_id:
       - light.soverom_2_downlights
@@ -208,6 +252,13 @@
     target:
       device_id: e01ee90accf18484bd5670293fc2e608
     action: media_player.media_stop
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      floor_id:
+      - 1_etasje
+      - 2_etasje
   mode: single
 - id: '1725914676383'
   alias: Utelys på kveld
@@ -281,6 +332,7 @@
         entity_id:
         - light.loftstue_downlights
         - light.loftstue_taklys
+        - light.wardrobe
       time_delay: 10
       ambient_light_sensor: sensor.hms_soverom_illuminance
       include_ambient: ambient_enabled
@@ -301,3 +353,209 @@
       include_time: time_enabled
       after_time: '21:00:00'
       before_time: '19:00:00'
+- id: '1729235404926'
+  alias: Lys på Bryter Stue Kitchen
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.bryter_stue_kitchen_vkt
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      brightness_pct: 100
+    target:
+      entity_id:
+      - light.stue_dw3
+      - light.stue_dw4
+      - light.stue_dow2
+  mode: single
+- id: '1729236857820'
+  alias: Bryter Stue Kitchen Skru av lys
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.bryter_stue_kitchen_vkb
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - action: light.turn_off
+    target:
+      entity_id:
+      - light.stue_dw3
+      - light.stue_dw4
+      - light.stue_dow2
+    data: {}
+  mode: single
+- id: '1729343184413'
+  alias: Bryter Stue Kitchen - HKT kort Lys
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.bryter_stue_kitchen_hkt1
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.kjokken_dag
+  mode: single
+- id: '1729431605624'
+  alias: Bryter ved trapp - VKT1 Kort
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.bryter_ved_trapp_vk1t
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.tv_stua_dag
+  mode: single
+- id: '1729431657109'
+  alias: Bryter ved trapp VKT lang
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.bryter_ved_trapp_vkt2
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.tv_stua_kveld
+  mode: single
+- id: '1729453107062'
+  alias: Sover barna check?
+  description: ''
+  triggers:
+  - trigger: time
+    at: '21:00:00'
+  conditions: []
+  actions:
+  - action: notify.mobile_app_iflott
+    data:
+      title: Kveld nå?
+      message: Klokka er 21:00, sover barna?
+      data:
+        actions:
+        - action: JA
+          title: Ja
+        - action: NEI
+          title: Nei
+  mode: single
+- id: '1729454039281'
+  alias: Action - barna sover
+  description: ''
+  triggers:
+  - trigger: event
+    event_type: ios.notification_action_fired
+    event_data:
+      actionName: JA
+  conditions: []
+  actions: []
+  mode: single
+- id: '1729458532671'
+  alias: MASTER BORTE
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.entre_bryter_knapp_3
+    from: 'on'
+    to: 'off'
+  conditions: []
+  actions:
+  - action: notify.mobile_app_iflott
+    metadata: {}
+    data:
+      message: BORTE
+  mode: single
+- id: '1729458565140'
+  alias: MASTER HJEMME
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.entre_bryter_knapp_3
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.tv_stua_dag
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.kjokken_dag
+  - action: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - light.stue_dow2
+      - light.stue_dw4
+      - light.stue_dw3
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.trapp_plan_1
+      - switch.trapp_plan_2
+      - switch.stikk_ved_daybed
+      - switch.stikk_ved_sofa
+      - switch.handkletorkere
+      - switch.entre_vegglys
+  mode: single
+- id: '1729719066348'
+  alias: Bryter Stue Kjøkken - HKT2 (langt trykk)
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.bryter_stue_kitchen_hkt2
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.kjokken_kveld
+  mode: single
+- id: '1732544554805'
+  alias: Katharina på vei hjem
+  description: ''
+  triggers:
+  - device_id: bbf49d7e5157c686f564c141b5e76ee5
+    domain: device_tracker
+    entity_id: 33f80e7329fc4db05574f83757e2a20a
+    type: leaves
+    trigger: device
+    zone: zone.skatt
+  conditions: []
+  actions:
+  - action: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Katharina i farta...
+  mode: single

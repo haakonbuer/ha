@@ -38,13 +38,20 @@
   },
   "device_automation": {
     "action_type": {
+      "delete_basic_charge_plan": "Supprimer le plan de charge de base",
+      "delete_weekly_charge_plan": "Supprimer le plan de charge hebdomadaire",
+      "disable_basic_charge_plan": "Désactiver le plan de charge de base",
+      "disable_weekly_charge_plan": "Désactiver le plan de charge hebdomadaire",
+      "enable_basic_charge_plan": "Activer le plan de charge de base",
+      "enable_weekly_charge_plan": "Activer le plan de charge hebdomadaire",
       "override_schedule": "Outrepasser la planification",
       "pause": "Pause de la charge",
       "reboot": "Redémarrer le chargeur",
       "resume": "Reprendre la charge",
       "start": "Commencer la charge",
       "stop": "Arrêter la charge",
-      "toggle": "Basculer la charge"
+      "toggle": "Basculer la charge",
+      "update_firmware": "Mise à jour du firmware"
     },
     "condition_type": {
       "authenticating": "{entity_name} est Authentification",
@@ -99,9 +106,6 @@
   },
   "entity": {
     "binary_sensor": {
-      "basic_schedule": {
-        "name": "Planification basique"
-      },
       "cable_locked": {
         "name": "Câble verrouillé"
       },
@@ -110,9 +114,6 @@
       },
       "update_available": {
         "name": "Mise à jour disponible"
-      },
-      "weekly_schedule": {
-        "name": "Planification hebdomadaire"
       }
     },
     "sensor": {
@@ -328,6 +329,10 @@
       "options": {
         "delete_basic_charge_plan": "Supprimer le plan de charge de base",
         "delete_weekly_charge_plan": "Supprimer le plan de charge hebdomadaire",
+        "disable_basic_charge_plan": "Désactiver le plan de charge de base",
+        "disable_weekly_charge_plan": "Désactiver le plan de charge hebdomadaire",
+        "enable_basic_charge_plan": "Activer le plan de charge de base",
+        "enable_weekly_charge_plan": "Activer le plan de charge hebdomadaire",
         "override_schedule": "Outrepasser la planification",
         "pause": "Pause",
         "reboot": "Redémarrer le chargeur",
@@ -336,6 +341,13 @@
         "stop": "Arrêter",
         "toggle": "Basculer",
         "update_firmware": "Mettre à jour le firmware"
+      }
+    },
+    "phase_mode": {
+      "options": {
+        "1_phase": "Mode monophasé",
+        "3_phase": "Mode triphasé",
+        "auto_phase": "Mode de phase automatique"
       }
     },
     "weekday": {
@@ -368,6 +380,10 @@
     "set_basic_charge_plan": {
       "description": "Définissez un plan de charge de base",
       "fields": {
+        "current": {
+          "description": "Courant maximal pendant le plan",
+          "name": "Courant maximal"
+        },
         "device_id": {
           "description": "Sélectionnez l'appareil à contrôler",
           "name": "Cible"
@@ -428,6 +444,20 @@
         }
       },
       "name": "Définissez la limite maximale du chargeur"
+    },
+    "set_charger_phase_mode": {
+      "description": "Définissez le mode de phase du chargeur",
+      "fields": {
+        "device_id": {
+          "description": "Sélectionnez l'appareil à contrôler",
+          "name": "Cible"
+        },
+        "phase_mode": {
+          "description": "Mode de phase du chargeur",
+          "name": "Mode de phase"
+        }
+      },
+      "name": "Définissez le mode de phase du chargeur"
     },
     "set_charging_cost": {
       "description": "Définissez le coût de charge par kWh pour le site de charge",
@@ -524,6 +554,10 @@
     "set_weekly_charge_plan": {
       "description": "Définissez un plan de charge hebdomadaire",
       "fields": {
+        "current": {
+          "description": "Courant maximal pendant le plan",
+          "name": "Courant maximal"
+        },
         "day": {
           "description": "Jour de la semaine de la planification",
           "name": "Jour de la semaine"

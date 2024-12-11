@@ -152,10 +152,16 @@ skru_av_forste_etg:
   mode: single
   alias: Skru av lys i 1. etg
   sequence:
-  - service: light.turn_off
-    target:
+  - target:
       floor_id:
       - 1_etasje
+    action: light.turn_off
+    data: {}
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      floor_id: 1_etasje
 skru_av_andre_etg:
   mode: single
   alias: Skru av lys i 2. etg

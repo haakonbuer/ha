@@ -37,3 +37,8 @@ sensor:
     humidity:
       name: "Test humid"
     update_interval: 60s
+
+  - platform: wifi_signal
+    name: "Test WiFi"
+    update_interval: 60s
+
