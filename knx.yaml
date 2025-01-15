@@ -108,6 +108,10 @@ sensor:
   - name: "Vaskerom lufttemp"
     state_address: "2/0/24"
     type: temperature
+
+  - name: "Vaskerom vektet temperatur"
+    state_address: "2/0/30"
+    type: temperature
       
   - name: "Bryter ved trapp - temperatur"
     state_address: "3/1/1"
@@ -518,6 +522,10 @@ switch:
 
   - name: "Tvangskjøring varme 2.etg"
     address: "0/0/202"
+
+# Usikker på om denne fungerer, kan være at den må taes vekk...
+  - name: "Vaskerom termostat - ikke varmekabler"
+    address: "2/2/55"
 
   - name: "Master sov bryter TA"
     address: "1/2/141"
