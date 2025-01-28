@@ -1,0 +1,23 @@
+nattsenk_schedule:
+  name: "Nattsenking av temperaturer"
+  monday: 
+    - from: "00:00"
+      to: "06:30"
+  tuesday: 
+    - from: "00:00"
+      to: "06:30"
+  wednesday: 
+    - from: "00:00"
+      to: "06:30"
+  thursday: 
+    - from: "00:00"
+      to: "06:30"
+  friday: 
+    - from: "00:00"
+      to: "06:30"
+  saturday: 
+    - from: "00:00"
+      to: "06:30"
+  sunday: 
+    - from: "00:00"
+      to: "06:30"
