@@ -19,49 +19,14 @@
     target:
       area_id: living_room
   mode: single
-- id: '1714078223227'
-  alias: Lesestol - skru på når man setter seg ned
-  description: ''
-  trigger:
-  - type: occupied
-    platform: device
-    device_id: dff1b13328483c5f15b8eb2aa305d208
-    entity_id: 834eb9b0737a41eb41ae9ff96840eae3
-    domain: binary_sensor
-  condition: []
-  action:
-  - service: light.turn_on
-    metadata: {}
-    data:
-      brightness_pct: 100
-    target:
-      device_id: 39cb21429aa12722dbce1862c8f5323e
-  mode: single
-- id: '1714078291568'
-  alias: Lesestol - skru av når man går
-  description: ''
-  trigger:
-  - type: not_occupied
-    platform: device
-    device_id: dff1b13328483c5f15b8eb2aa305d208
-    entity_id: 834eb9b0737a41eb41ae9ff96840eae3
-    domain: binary_sensor
-  condition: []
-  action:
-  - service: light.turn_off
-    metadata: {}
-    data: {}
-    target:
-      device_id: 39cb21429aa12722dbce1862c8f5323e
-  mode: single
 - id: '1715242342399'
-  alias: WC-rom - Lys ved bevegelse
+  alias: Motion WC-rom
   description: Skrur på lys på WC rom
   use_blueprint:
     path: Blackshome/sensor-light.yaml
     input:
       motion_trigger:
-      - binary_sensor.hue_motion_sensor_1_motion
+      - binary_sensor.hms_wc_occupancy
       light_switch:
         entity_id:
         - switch.wc_rom_speil
@@ -71,26 +36,20 @@
 - id: '1716889490904'
   alias: Skru av lys om kvelden
   description: ''
-  trigger:
-  - platform: time
-    at: 00:30:00
-  condition: []
-  action:
-  - metadata: {}
-    data: {}
-    target:
-      floor_id:
-      - kjeller
-      - 1_etasje
-      - 2_etasje
-    action: light.turn_off
-  - action: switch.turn_off
+  triggers:
+  - at: 00:30:00
+    trigger: time
+  conditions: []
+  actions:
+  - action: script.skru_av_kjeller
     metadata: {}
     data: {}
-    target:
-      floor_id:
-      - 1_etasje
-      - 2_etasje
+  - action: script.skru_av_forste_etg
+    metadata: {}
+    data: {}
+  - action: script.skru_av_andre_etg
+    metadata: {}
+    data: {}
   mode: single
 - id: '1717103865567'
   alias: Good morning
@@ -140,6 +99,24 @@
       brightness_pct: 100
     target:
       area_id: entrance
+  - action: light.turn_on
+    metadata: {}
+    data:
+      transition: 1200
+      brightness_pct: 100
+    target:
+      entity_id:
+      - light.hannahs_room
+      - light.hue_color_candle_right
+  - action: light.turn_on
+    metadata: {}
+    data:
+      transition: 1200
+      brightness_pct: 100
+    target:
+      entity_id:
+      - light.leselys_stua
+      - light.nikolai_bulb
   - delay:
       hours: 0
       minutes: 5
@@ -231,34 +208,28 @@
 - id: '1720042634381'
   alias: Dra på jobb
   description: ''
-  trigger:
-  - platform: time
-    at: 09:00:00
-  condition:
+  triggers:
+  - at: 09:00:00
+    trigger: time
+  conditions:
   - condition: state
     entity_id: binary_sensor.workday_sensor
     state: 'on'
-  action:
-  - metadata: {}
+  actions:
+  - action: script.skru_av_kjeller
+    metadata: {}
     data: {}
-    target:
-      floor_id:
-      - kjeller
-      - 1_etasje
-      - 2_etasje
-    action: light.turn_off
+  - action: script.skru_av_forste_etg
+    metadata: {}
+    data: {}
+  - action: script.skru_av_andre_etg
+    metadata: {}
+    data: {}
   - metadata: {}
     data: {}
     target:
       device_id: e01ee90accf18484bd5670293fc2e608
     action: media_player.media_stop
-  - action: switch.turn_off
-    metadata: {}
-    data: {}
-    target:
-      floor_id:
-      - 1_etasje
-      - 2_etasje
   mode: single
 - id: '1725914676383'
   alias: Utelys på kveld
@@ -327,14 +298,14 @@
     path: Blackshome/sensor-light.yaml
     input:
       motion_trigger:
-      - binary_sensor.hms_soverom_motion
+      - binary_sensor.hms_media_occupancy
       light_switch:
         entity_id:
         - light.loftstue_downlights
-        - light.loftstue_taklys
-        - light.wardrobe
+        - light.nabu_casa_ha_connect_zbt_1_hue_media_tak
+        device_id: 4eb7f6960606eddcb694c43018c69c45
       time_delay: 10
-      ambient_light_sensor: sensor.hms_soverom_illuminance
+      ambient_light_sensor: sensor.hms_media_illuminance
       include_ambient: ambient_enabled
       include_night_lights: night_lights_enabled
       night_lights_conditions:
@@ -486,6 +457,21 @@
     metadata: {}
     data:
       message: BORTE
+  - action: script.skru_av_kjeller
+    metadata: {}
+    data: {}
+  - action: script.skru_av_forste_etg
+    metadata: {}
+    data: {}
+  - action: script.skru_av_andre_etg
+    metadata: {}
+    data: {}
+  - action: input_select.select_option
+    metadata: {}
+    data:
+      option: Away
+    target:
+      entity_id: input_select.status
   mode: single
 - id: '1729458565140'
   alias: MASTER HJEMME
@@ -502,10 +488,12 @@
     metadata: {}
     target:
       entity_id: scene.tv_stua_dag
+    data: {}
   - action: scene.turn_on
     metadata: {}
     target:
       entity_id: scene.kjokken_dag
+    data: {}
   - action: light.turn_on
     metadata: {}
     data: {}
@@ -514,6 +502,8 @@
       - light.stue_dow2
       - light.stue_dw4
       - light.stue_dw3
+      - light.stue_downlights_1
+      - light.entre_downlights
   - action: switch.turn_on
     metadata: {}
     data: {}
@@ -525,6 +515,11 @@
       - switch.stikk_ved_sofa
       - switch.handkletorkere
       - switch.entre_vegglys
+      - switch.smartplugtvnede_switch
+  - action: input_select.select_option
+    metadata: {}
+    data:
+      option: Hjemme
   mode: single
 - id: '1729719066348'
   alias: Bryter Stue Kjøkken - HKT2 (langt trykk)
@@ -558,4 +553,538 @@
     metadata: {}
     data:
       message: Katharina i farta...
+  mode: single
+- id: '1735983798425'
+  alias: Motion Mellomgang
+  description: ''
+  use_blueprint:
+    path: homeassistant/motion_light.yaml
+    input:
+      motion_entity: binary_sensor.hms_mellomgang_occupancy
+      light_target:
+        entity_id: light.namron_kg_light
+- id: '1736323220165'
+  alias: Motion Master Bad
+  description: ''
+  use_blueprint:
+    path: Blackshome/sensor-light.yaml
+    input:
+      motion_trigger:
+      - binary_sensor.hms_mbad_occupancy
+      light_switch:
+        entity_id:
+        - light.bad_downlights
+        - light.bad_speil
+        - light.bad_dusj
+      time_delay: 10
+      include_night_lights: night_lights_enabled
+      night_lights_conditions:
+      - time_enabled
+      night_lights_after_time: '23:30:00'
+      night_lights_before_time: 06:00:00
+      night_lights:
+        entity_id:
+        - light.bad_speil
+        - light.bad_dusj
+        - light.bad_downlights
+      night_time_delay: 10
+      include_night_light_control:
+      - if_lights_are_on_adjust_when_crossing_over
+      - use_brightness
+      include_bypass: []
+- id: '1737306029116'
+  alias: Switch - Nikolai
+  description: Nswitch konfig
+  use_blueprint:
+    path: dustins/zha-philips-hue-v2-smart-dimmer-switch-and-remote-rwl022.yaml
+    input:
+      zha_device: 9faa7ea9153fb6b3246177b20d57b4aa
+      Power_Press:
+      - action: light.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
+          - light.ngo_light
+          - light.soverom_1_downlights
+      Hue_Press:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
+          - light.ngo_light
+          - light.soverom_1_downlights
+      Up_Press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: 10
+        target:
+          entity_id:
+          - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
+          - light.ngo_light
+      Down_Press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -10
+        target:
+          entity_id:
+          - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
+          - light.ngo_light
+      Power_Press2x:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.nikolai_sovetid
+      Power_Press3x: []
+      Power_HoldPress:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 100
+        target:
+          entity_id:
+          - light.hue_mini_bulb_nikolai_light
+          - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
+          - light.soverom_1_downlights
+          - light.ngo_light
+- id: '1737306953764'
+  alias: Switch - Hbryter soverom
+  description: ''
+  use_blueprint:
+    path: sandervv/ZHA - Hue Dimmer Fully Configurable.yaml
+    input:
+      remote: 47df08e15541e5668cb3824627cef97b
+      button_on_short_press:
+      - action: light.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      button_off_short_press:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      button_on_long_press:
+      - action: light.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.master_sov_spotter
+      button_off_long_press:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.master_sov_spotter
+      button_up_short_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: 10
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      button_down_short_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -10
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      button_on_double_press:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.master_sov_spotter
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 15
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+- id: '1737313048110'
+  alias: Switch - Kbryter bedrom
+  description: ''
+  use_blueprint:
+    path: sandervv/ZHA - Hue Dimmer Fully Configurable.yaml
+    input:
+      remote: b676bbe2efe194ed1d6567451e868aa8
+      button_on_short_press:
+      - action: light.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+          - light.master_sov_spotter
+      button_off_short_press:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+          - light.master_sov_spotter
+      button_on_long_press:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_sov_kveld
+      button_off_long_press: []
+      button_up_short_press:
+      - if:
+        - condition: state
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+          state: 'on'
+        then:
+        - action: light.turn_on
+          metadata: {}
+          data:
+            brightness_step_pct: 10
+          target:
+            entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      - if:
+        - condition: state
+          entity_id: light.master_sov_spotter
+          state: 'on'
+        then:
+        - action: light.turn_on
+          metadata: {}
+          data:
+            brightness_step_pct: 10
+          target:
+            entity_id: light.master_sov_spotter
+      button_down_short_press:
+      - if:
+        - condition: state
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+          state: 'on'
+        then:
+        - action: light.turn_on
+          metadata: {}
+          data:
+            brightness_step_pct: -10
+          target:
+            entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      - if:
+        - condition: state
+          entity_id: light.master_sov_spotter
+          state: 'on'
+        then:
+        - action: light.turn_on
+          metadata: {}
+          data:
+            brightness_step_pct: -10
+          target:
+            entity_id: light.master_sov_spotter
+      button_up_long_press:
+      - if:
+        - condition: state
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+          state: 'on'
+        then:
+        - action: light.turn_on
+          metadata: {}
+          data:
+            brightness_step_pct: 5
+          target:
+            entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      - if:
+        - condition: state
+          entity_id: light.master_sov_spotter
+          state: 'on'
+        then:
+        - action: light.turn_on
+          metadata: {}
+          data:
+            brightness_step_pct: 5
+          target:
+            entity_id: light.master_sov_spotter
+      button_down_long_press:
+      - if:
+        - condition: state
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+          state: 'on'
+        then:
+        - action: light.turn_on
+          metadata: {}
+          data:
+            brightness_step_pct: -5
+          target:
+            entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      - if:
+        - condition: state
+          entity_id: light.master_sov_spotter
+          state: 'on'
+        then:
+        - action: light.turn_on
+          metadata: {}
+          data:
+            brightness_step_pct: -5
+          target:
+            entity_id: light.master_sov_spotter
+      button_on_double_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 100
+        target:
+          entity_id:
+          - light.master_sov_spotter
+          - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      button_off_double_press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 50
+        target:
+          entity_id:
+          - light.master_sov_spotter
+          - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+- id: '1737848222035'
+  alias: Temperatur - bad - natt
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - schedule.nattsenk_schedule
+    to: 'on'
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.status
+      state: Vacation
+  actions:
+  - action: climate.set_temperature
+    metadata: {}
+    data:
+      temperature: 26
+    target:
+      entity_id: climate.bad
+  mode: single
+- id: '1737848346820'
+  alias: Temperatur - bad - dag
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - schedule.nattsenk_schedule
+    to: 'off'
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.status
+      state: Vacation
+  actions:
+  - action: climate.set_temperature
+    metadata: {}
+    data:
+      temperature: 27
+    target:
+      entity_id: climate.bad
+  mode: single
+- id: '1737878383840'
+  alias: Hannah lysbryter
+  description: ''
+  use_blueprint:
+    path: dustins/zha-philips-hue-v2-smart-dimmer-switch-and-remote-rwl022.yaml
+    input:
+      zha_device: 83317be2ea7a48c2cb6a6b626fa8e2e0
+      Power_Press:
+      - action: light.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.hue_hannah_bulb_light
+          - light.hue_mini_bulb_hannah_light
+          - light.soverom_2_downlights
+      Up_Press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: 10
+        target:
+          entity_id:
+          - light.hue_mini_bulb_hannah_light
+          - light.hue_hannah_bulb_light
+      Down_Press:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_step_pct: -10
+        target:
+          entity_id:
+          - light.hue_hannah_bulb_light
+          - light.hue_mini_bulb_hannah_light
+          - light.soverom_2_downlights
+      Hue_Press:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.hue_hannah_bulb_light
+          - light.hue_mini_bulb_hannah_light
+          - light.soverom_2_downlights
+      Power_Press2x:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.hannah_sovetid
+      Power_HoldPress:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.hannah_clear
+- id: '1737967391614'
+  alias: Impulse for garasjen
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_button.impulse_garasje
+    to:
+  conditions: []
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.frient_io_hormann
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.frient_io_hormann
+  mode: single
+- id: '1738273451129'
+  alias: Garasje fra bil
+  description: ''
+  triggers:
+  - event_data:
+      actionID: 5F0D11C4-6ED5-4F10-8335-38E7515479DD
+    event_type: ios.action_fired
+    trigger: event
+  conditions: []
+  actions:
+  - action: input_button.press
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_button.impulse_garasje
+  mode: single
+- id: '1738531442767'
+  alias: EV lading
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /10
+  conditions:
+  - condition: state
+    entity_id: timer.ev_lading_1_time
+    state: idle
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.530e_xdrive_connection_status
+        state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.530e_xdrive_remaining_battery_percent
+        above: 40
+      sequence:
+      - if:
+        - condition: time
+          after: 02:00:00
+          before: 05:00:00
+          weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+          - sat
+          - sun
+        then:
+        - if:
+          - condition: numeric_state
+            entity_id: sensor.eurum8m4_dynamic_charger_limit
+            below: 32
+          then:
+          - action: script.ev_lader_max_gass
+            metadata: {}
+            data: {}
+        else:
+        - if:
+          - condition: numeric_state
+            entity_id: sensor.eurum8m4_dynamic_charger_limit
+            above: 6
+          then:
+          - action: script.ev_pause
+            metadata: {}
+            data: {}
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.530e_xdrive_connection_status
+        state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.530e_xdrive_remaining_battery_percent
+        below: 40
+      sequence:
+      - action: script.ev_laveste_gass
+        metadata: {}
+        data: {}
+  mode: single
+- id: '1738534464556'
+  alias: Justering av temperatur
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - schedule.dagtid_schedule
+    - schedule.nattsenk_schedule
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: schedule.nattsenk_schedule
+        state: 'on'
+      sequence: []
+    - conditions:
+      - condition: state
+        entity_id: schedule.dagtid_schedule
+        state: 'on'
+      sequence: []
+  mode: single
+- id: '1739996395159'
+  alias: Vacation mode - turn on
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_select.status
+    to: Vacation
+  conditions: []
+  actions:
+  - action: climate.set_temperature
+    metadata: {}
+    data:
+      temperature: 20
+    target:
+      entity_id: climate.bad
   mode: single

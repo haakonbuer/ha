@@ -166,10 +166,51 @@ skru_av_andre_etg:
   mode: single
   alias: Skru av lys i 2. etg
   sequence:
-  - service: light.turn_off
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
     target:
-      floor_id:
-      - 2_etasje
+      floor_id: 2_etasje
+  - action: light.turn_off
+    data: {}
+    target:
+      area_id:
+      - bad
+      - bedroom
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - light.soverom_1_downlights
+      - light.soverom_2_downlights
+    alias: Skru av downlights - Hannah og Nikolai
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - light.hue_hannah_bulb_light
+      - light.hue_mini_bulb_hannah_light
+    alias: Skru av Hannah sitt rom - zigbee
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - light.ngo_light
+      - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
+      - light.hue_mini_bulb_nikolai_light
+    alias: Skru av Nikolai sitt rom - zigbee
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - light.hue_lightstrip_oppe_light
+      - light.nabu_casa_ha_connect_zbt_1_hue_media_tak
+      - light.loftstue_downlights
+    alias: Lys i mediarom
 skru_av_kjeller:
   mode: single
   alias: Skru av lys i kjeller
@@ -188,3 +229,35 @@ kitchen_off:
       area_id: kitchen
   description: Script which turns off kitchen area lights
   icon: mdi:fridge
+ev_lader_max_gass:
+  alias: EV - lader max gass
+  sequence:
+  - action: easee.set_charger_dynamic_limit
+    metadata: {}
+    data:
+      time_to_live: 0
+      device_id: 647046bf679310144fe0193084093650
+      current: 32
+  description: ''
+  icon: mdi:ev-station
+ev_pause:
+  alias: EV - pause
+  sequence:
+  - action: easee.action_command
+    metadata: {}
+    data:
+      device_id: 647046bf679310144fe0193084093650
+      action_command: pause
+  description: ''
+  icon: mdi:ev-station
+ev_laveste_gass:
+  alias: EV - laveste gass
+  sequence:
+  - action: easee.set_charger_dynamic_limit
+    metadata: {}
+    data:
+      time_to_live: 0
+      current: 7
+      device_id: 647046bf679310144fe0193084093650
+  description: ''
+  icon: mdi:ev-station

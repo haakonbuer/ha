@@ -11,3 +11,4 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 
 knx: !include knx.yaml
+schedule: !include schedule.yaml

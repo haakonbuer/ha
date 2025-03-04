@@ -410,20 +410,6 @@
 - id: '1729415861703'
   name: TV Stua Kveld
   entities:
-    light.hue_white_lamp_7:
-      effect_list:
-      - None
-      - candle
-      supported_color_modes:
-      - brightness
-      effect: None
-      color_mode: brightness
-      brightness: 153
-      mode: normal
-      dynamics: none
-      friendly_name: PH louis
-      supported_features: 44
-      state: 'on'
     light.hue_bloom_1:
       min_color_temp_kelvin: 2000
       max_color_temp_kelvin: 6535
@@ -432,24 +418,24 @@
       supported_color_modes:
       - color_temp
       - xy
-      friendly_name: Hue bloom 1
-      supported_features: 40
       color_mode: xy
       brightness: 144
       color_temp_kelvin:
       color_temp:
       hs_color:
-      - 39.218
-      - 70.196
+      - 40.865
+      - 72.549
       rgb_color:
       - 255
-      - 193
-      - 76
+      - 196
+      - 70
       xy_color:
-      - 0.502
-      - 0.4263
+      - 0.5022
+      - 0.4331
       mode: normal
       dynamics: none
+      friendly_name: Hue bloom 1
+      supported_features: 40
       state: 'on'
     light.hue_bloom_2:
       min_color_temp_kelvin: 2000
@@ -464,15 +450,15 @@
       color_temp_kelvin:
       color_temp:
       hs_color:
-      - 39.218
-      - 70.196
+      - 40.865
+      - 72.549
       rgb_color:
       - 255
-      - 193
-      - 76
+      - 196
+      - 70
       xy_color:
-      - 0.502
-      - 0.4263
+      - 0.5022
+      - 0.4331
       mode: normal
       dynamics: none
       friendly_name: Hue bloom 2
@@ -489,46 +475,80 @@
     switch.stikk_ved_sofa:
       friendly_name: Stikk ved sofa
       state: 'off'
-    light.lightstrip_2:
+    light.hue_petra_light:
       min_color_temp_kelvin: 2000
       max_color_temp_kelvin: 6535
       min_mireds: 153
       max_mireds: 500
       effect_list:
-      - None
-      - candle
-      - fire
-      - prism
-      - sparkle
-      - opal
-      - glisten
+      - 'off'
+      - colorloop
       supported_color_modes:
       - color_temp
       - xy
-      effect: None
+      effect: 'off'
       color_mode: color_temp
-      brightness: 143
-      color_temp_kelvin: 2732
-      color_temp: 366
+      brightness: 122
+      color_temp_kelvin: 2680
+      color_temp: 373
       hs_color:
-      - 28.327
-      - 64.71
+      - 28.439
+      - 66.366
       rgb_color:
       - 255
-      - 167
-      - 89
+      - 166
+      - 86
       xy_color:
-      - 0.524
-      - 0.387
-      mode: normal
-      dynamics: none
-      friendly_name: Lightstrip 2
+      - 0.527
+      - 0.388
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Hue Petra Light
+      supported_features: 44
+      state: 'on'
+    light.ph_louis_light:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 128
+      off_with_transition: false
+      off_brightness:
+      friendly_name: PH Louis Light
+      supported_features: 40
+      state: 'on'
+    light.hue_lightstrip_bak_tv_light:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - 'off'
+      - colorloop
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: 'off'
+      color_mode: color_temp
+      brightness: 125
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Hue lightstrip bak tv Light
       supported_features: 44
       state: 'on'
   icon: mdi:television
   metadata:
-    light.hue_white_lamp_7:
-      entity_only: true
     light.hue_bloom_1:
       entity_only: true
     light.hue_bloom_2:
@@ -537,20 +557,15 @@
       entity_only: true
     switch.stikk_ved_sofa:
       entity_only: true
-    light.lightstrip_2:
+    light.hue_petra_light:
+      entity_only: true
+    light.ph_louis_light:
+      entity_only: true
+    light.hue_lightstrip_bak_tv_light:
       entity_only: true
 - id: '1729417391182'
   name: TV Stua Dag
   entities:
-    light.hue_white_lamp_7:
-      effect_list:
-      - None
-      - candle
-      supported_color_modes:
-      - brightness
-      friendly_name: PH louis
-      supported_features: 44
-      state: unavailable
     light.hue_bloom_1:
       min_color_temp_kelvin: 2000
       max_color_temp_kelvin: 6535
@@ -564,15 +579,15 @@
       color_temp_kelvin:
       color_temp:
       hs_color:
-      - 36.201
-      - 70.196
+      - 37.5
+      - 72.157
       rgb_color:
       - 255
-      - 184
-      - 76
+      - 186
+      - 71
       xy_color:
-      - 0.5137
-      - 0.415
+      - 0.5139
+      - 0.4208
       mode: normal
       dynamics: none
       friendly_name: Hue bloom 1
@@ -591,15 +606,15 @@
       color_temp_kelvin:
       color_temp:
       hs_color:
-      - 34.483
-      - 68.235
+      - 35.73
+      - 69.804
       rgb_color:
       - 255
-      - 181
-      - 81
+      - 183
+      - 77
       xy_color:
-      - 0.514
-      - 0.409
+      - 0.5138
+      - 0.4139
       mode: normal
       dynamics: none
       friendly_name: Hue bloom 2
@@ -616,52 +631,80 @@
     switch.stikk_ved_sofa:
       friendly_name: Stikk ved sofa
       state: 'on'
-    light.leselys_stua:
+    light.ph_louis_light:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 254
+      off_with_transition: false
+      off_brightness:
+      friendly_name: PH Louis Light
+      supported_features: 40
+      state: 'on'
+    light.hue_petra_light:
       min_color_temp_kelvin: 2000
       max_color_temp_kelvin: 6535
       min_mireds: 153
       max_mireds: 500
       effect_list:
-      - None
-      - candle
-      - fire
-      - prism
-      - sparkle
-      - opal
-      - glisten
-      - unknown
-      - unknown
-      - unknown
-      - unknown
-      - sunrise
-      - sunset
+      - 'off'
+      - colorloop
       supported_color_modes:
       - color_temp
       - xy
-      effect: None
+      effect: 'off'
       color_mode: color_temp
-      brightness: 204
-      color_temp_kelvin: 2732
-      color_temp: 366
+      brightness: 254
+      color_temp_kelvin: 2680
+      color_temp: 373
       hs_color:
-      - 28.327
-      - 64.71
+      - 28.439
+      - 66.366
       rgb_color:
       - 255
-      - 167
-      - 89
+      - 166
+      - 86
       xy_color:
-      - 0.524
-      - 0.387
-      mode: normal
-      dynamics: none
-      friendly_name: Leselys stua
+      - 0.527
+      - 0.388
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Hue Petra Light
+      supported_features: 44
+      state: 'on'
+    light.hue_lightstrip_bak_tv_light:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - 'off'
+      - colorloop
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: 'off'
+      color_mode: color_temp
+      brightness: 189
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Hue lightstrip bak tv Light
       supported_features: 44
       state: 'on'
   icon: mdi:television
   metadata:
-    light.hue_white_lamp_7:
-      entity_only: true
     light.hue_bloom_1:
       entity_only: true
     light.hue_bloom_2:
@@ -670,7 +713,11 @@
       entity_only: true
     switch.stikk_ved_sofa:
       entity_only: true
-    light.leselys_stua:
+    light.ph_louis_light:
+      entity_only: true
+    light.hue_petra_light:
+      entity_only: true
+    light.hue_lightstrip_bak_tv_light:
       entity_only: true
 - id: '1729452529038'
   name: Movie time
@@ -919,4 +966,292 @@
     light.spisestue_led_list:
       entity_only: true
     light.spisestue_taklys:
+      entity_only: true
+- id: '1738003225975'
+  name: Hannah sovetid
+  entities:
+    light.hue_mini_bulb_hannah_light:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - 'off'
+      - colorloop
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: 'off'
+      color_mode: xy
+      brightness: 3
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 301.923
+      - 61.176
+      rgb_color:
+      - 255
+      - 99
+      - 250
+      xy_color:
+      - 0.381
+      - 0.186
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Hue mini bulb Hannah Light
+      supported_features: 44
+      state: 'on'
+    light.soverom_2_downlights:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      friendly_name: Soverom 2 downlights
+      supported_features: 0
+      state: 'off'
+    light.hue_hannah_bulb_light:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - 'off'
+      - colorloop
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: 'off'
+      color_mode: xy
+      brightness: 3
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 292.895
+      - 89.412
+      rgb_color:
+      - 228
+      - 27
+      - 255
+      xy_color:
+      - 0.35
+      - 0.141
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Hue Hannah Bulb Light
+      supported_features: 44
+      state: 'on'
+  icon: mdi:human-female
+  metadata:
+    light.hue_mini_bulb_hannah_light:
+      entity_only: true
+    light.soverom_2_downlights:
+      entity_only: true
+    light.hue_hannah_bulb_light:
+      entity_only: true
+- id: '1738083210393'
+  name: Nikolai sovetid
+  entities:
+    light.ngo_light:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - 'off'
+      - colorloop
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: 'off'
+      color_mode: color_temp
+      brightness: 122
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Ngo Light
+      supported_features: 44
+      state: 'on'
+    light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - colorloop
+      - 'off'
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: 'off'
+      color_mode: color_temp
+      brightness: 3
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Nabu Casa HA Connect ZBT-1 Nikolai taklampe
+      supported_features: 44
+      state: 'on'
+    light.soverom_1_downlights:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      friendly_name: Soverom 1 downlights
+      supported_features: 0
+      state: 'off'
+  metadata:
+    light.ngo_light:
+      entity_only: true
+    light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe:
+      entity_only: true
+    light.soverom_1_downlights:
+      entity_only: true
+- id: '1738264756650'
+  name: Master sov - kveld
+  entities:
+    light.master_sov_spotter:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      friendly_name: Master sov spotter
+      supported_features: 0
+      state: 'off'
+    light.nabu_casa_ha_connect_zbt_1_sov_taklampe:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - colorloop
+      - 'off'
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: 'off'
+      color_mode: color_temp
+      brightness: 26
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Nabu Casa HA Connect ZBT-1 Sov taklampe
+      supported_features: 44
+      state: 'on'
+  metadata:
+    light.master_sov_spotter:
+      entity_only: true
+    light.nabu_casa_ha_connect_zbt_1_sov_taklampe:
+      entity_only: true
+- id: '1738343796354'
+  name: Hannah clear
+  entities:
+    light.hue_hannah_bulb_light:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - 'off'
+      - colorloop
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: 'off'
+      color_mode: color_temp
+      brightness: 254
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Hue Hannah Bulb Light
+      supported_features: 44
+      state: 'on'
+    light.hue_mini_bulb_hannah_light:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - 'off'
+      - colorloop
+      supported_color_modes:
+      - color_temp
+      - xy
+      effect: 'off'
+      color_mode: color_temp
+      brightness: 254
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Hue mini bulb Hannah Light
+      supported_features: 44
+      state: 'on'
+    light.soverom_2_downlights:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      friendly_name: Soverom 2 downlights
+      supported_features: 0
+      state: 'on'
+  metadata:
+    light.hue_hannah_bulb_light:
+      entity_only: true
+    light.hue_mini_bulb_hannah_light:
+      entity_only: true
+    light.soverom_2_downlights:
       entity_only: true

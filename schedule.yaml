@@ -3,21 +3,63 @@ nattsenk_schedule:
   monday: 
     - from: "00:00"
       to: "06:30"
+      data:
+        temp: 24
   tuesday: 
     - from: "00:00"
       to: "06:30"
+      data:
+        temp: 24
   wednesday: 
     - from: "00:00"
       to: "06:30"
+      data:
+        temp: 24
   thursday: 
     - from: "00:00"
       to: "06:30"
+      data:
+        temp: 24
   friday: 
     - from: "00:00"
       to: "06:30"
+      data:
+        temp: 24
   saturday: 
     - from: "00:00"
       to: "06:30"
+      data:
+        temp: 24
   sunday: 
     - from: "00:00"
       to: "06:30"
+      data:
+        temp: 24
+
+dagtid_schedule:
+  name: "Borte på dagtid"
+  monday: 
+    - from: "08:00"
+      to: "16:00"
+      data:
+        temp: 24
+  tuesday: 
+    - from: "08:00"
+      to: "16:00"
+      data:
+        temp: 24
+  wednesday: 
+    - from: "08:00"
+      to: "16:00"
+      data:
+        temp: 24
+  thursday: 
+    - from: "08:00"
+      to: "16:00"
+      data:
+        temp: 24
+  friday: 
+    - from: "08:00"
+      to: "16:00"
+      data:
+        temp: 24
