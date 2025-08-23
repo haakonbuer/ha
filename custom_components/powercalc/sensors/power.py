@@ -31,6 +31,7 @@ from homeassistant.core import (
     callback,
 )
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers import start
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.entity import EntityCategory
@@ -144,6 +145,18 @@ async def create_virtual_power_sensor(
             if CONF_CALCULATION_ENABLED_CONDITION not in sensor_config and power_profile.calculation_enabled_condition:
                 sensor_config[CONF_CALCULATION_ENABLED_CONDITION] = power_profile.calculation_enabled_condition
 
+            if config_entry and await power_profile.requires_manual_sub_profile_selection and "/" not in sensor_config.get(CONF_MODEL, ""):
+                ir.async_create_issue(
+                    hass,
+                    DOMAIN,
+                    f"sub_profile_{config_entry.entry_id}",
+                    is_fixable=True,
+                    severity=ir.IssueSeverity.WARNING,
+                    translation_key="sub_profile",
+                    translation_placeholders={"entry": config_entry.title},
+                    data={"config_entry_id": config_entry.entry_id},
+                )
+
         name = generate_power_sensor_name(
             sensor_config,
             sensor_config.get(CONF_NAME),
@@ -218,8 +231,8 @@ async def _get_power_profile(
             sensor_config,
             model_info=model_info,
         )
-        if power_profile and power_profile.sub_profile_select:
-            await _select_sub_profile(hass, power_profile, power_profile.sub_profile_select, source_entity)
+        if power_profile and power_profile.has_sub_profile_select_matchers:
+            await _select_sub_profile(hass, power_profile, power_profile.sub_profile_select, source_entity)  # type: ignore
     except ModelNotSupportedError as err:
         if not is_fully_configured(sensor_config):
             _LOGGER.error(
@@ -356,6 +369,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
         self._multiply_factor_standby = bool(sensor_config.get(CONF_MULTIPLY_FACTOR_STANDBY, False))
         self._ignore_unavailable_state = bool(sensor_config.get(CONF_IGNORE_UNAVAILABLE_STATE, False))
         self._rounding_digits = int(sensor_config.get(CONF_POWER_SENSOR_PRECISION, DEFAULT_POWER_SENSOR_PRECISION))
+        self._attr_suggested_display_precision = self._rounding_digits
         self.entity_id = entity_id
         self._sensor_config = sensor_config
         self._track_entities: set[str] = set()
@@ -476,10 +490,10 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
         """Return entities and templates that should be tracked."""
         entities_to_track = copy(self._strategy_instance.get_entities_to_track()) if self._strategy_instance else []
 
-        if self._power_profile and self._power_profile.sub_profile_select:
+        if self._power_profile and self._power_profile.has_sub_profile_select_matchers:
             self._sub_profile_selector = SubProfileSelector(
                 self.hass,
-                self._power_profile.sub_profile_select,
+                self._power_profile.sub_profile_select,  # type: ignore
                 self._source_entity,
             )
             entities_to_track.extend(self._sub_profile_selector.get_tracking_entities())
@@ -507,7 +521,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
         trigger_entity_id: str,
         state: State | None,
     ) -> None:
-        """Update power sensor based on new dependant entity state."""
+        """Update power sensor based on new dependent entity state."""
         self._standby_sensors.pop(self.entity_id, None)
         if self._sleep_power_timer:
             self._sleep_power_timer()

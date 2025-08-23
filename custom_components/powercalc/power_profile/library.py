@@ -29,7 +29,7 @@ class ProfileLibrary:
         self._hass = hass
         self._loader = loader
         self._profiles: dict[str, list[PowerProfile]] = {}
-        self._manufacturer_models: dict[str, list[str]] = {}
+        self._manufacturer_models: dict[str, set[str]] = {}
         self._manufacturer_device_types: dict[str, list] = {}
 
     async def initialize(self) -> None:
@@ -66,29 +66,29 @@ class ProfileLibrary:
 
         return CompositeLoader(loaders)
 
-    async def get_manufacturer_listing(self, device_types: set[DeviceType] | None = None) -> list[str]:
+    async def get_manufacturer_listing(self, device_types: set[DeviceType] | None = None) -> list[tuple[str, str]]:
         """Get listing of available manufacturers."""
         manufacturers = await self._loader.get_manufacturer_listing(device_types)
         return sorted(manufacturers)
 
-    async def get_model_listing(self, manufacturer: str, device_types: set[DeviceType] | None = None) -> list[str]:
+    async def get_model_listing(self, manufacturer: str, device_types: set[DeviceType] | None = None) -> set[str]:
         """Get listing of available models for a given manufacturer."""
 
         resolved_manufacturers = await self._loader.find_manufacturers(manufacturer)
         if not resolved_manufacturers:
-            return []
-        all_models: list[str] = []
+            return set()
+        all_models: set[str] = set()
         for manufacturer in resolved_manufacturers:
             cache_key = f"{manufacturer}/{device_types}"
             cached_models = self._manufacturer_models.get(cache_key)
             if cached_models:
-                all_models.extend(cached_models)
+                all_models.update(cached_models)
                 continue
             models = await self._loader.get_model_listing(manufacturer, device_types)
-            self._manufacturer_models[cache_key] = sorted(models)
-            all_models.extend(models)
+            self._manufacturer_models[cache_key] = models
+            all_models.update(models)
 
-        return all_models
+        return set(sorted(all_models))  # noqa: C414
 
     async def get_profile(
         self,
@@ -127,6 +127,9 @@ class ProfileLibrary:
             model_info = next(iter(models))
 
         json_data, directory = await self._load_model_data(model_info.manufacturer, model_info.model, custom_directory)
+
+        # json_data is potentially retrieved from cache, so we need to copy it to avoid modifying the cache
+        json_data = json_data.copy()
         if process_variables:
             if json_data.get("fields"):  # When custom fields in profile are defined, make sure all variables are passed
                 self.validate_variables(json_data, variables or {})
@@ -134,7 +137,8 @@ class ProfileLibrary:
 
         if linked_profile := json_data.get("linked_profile", json_data.get("linked_lut")):
             linked_manufacturer, linked_model = linked_profile.split("/")
-            _, directory = await self._load_model_data(linked_manufacturer, linked_model, custom_directory)
+            linked_json_data, directory = await self._load_model_data(linked_manufacturer, linked_model, custom_directory)
+            json_data.update(linked_json_data)
 
         return await self._create_power_profile_instance(model_info.manufacturer, model_info.model, directory, json_data)
 

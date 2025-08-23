@@ -7,6 +7,10 @@ expose:
 
 number:
 
+  - name: "Dali dim tid"
+    address: "0/0/150"
+    type: time_period_100msec
+
   - name: "Master sov bryter LED %"
     address: "1/2/140"
     type: percent
@@ -439,6 +443,18 @@ light:
     state_address: "1/2/111"
     brightness_address: "1/2/110"
     brightness_state_address: "1/2/112"
+
+  - name: "Master sov kontor spot"
+    address: "1/2/147"
+    state_address: "1/2/148"
+    brightness_address: "1/2/150"
+    brightness_state_address: "1/2/151"
+
+  - name: "Master sov garderobe spot"
+    address: "1/2/142"
+    state_address: "1/2/143"
+    brightness_address: "1/2/145"
+    brightness_state_address: "1/2/146"
 
   - name: "Master sov skap Haakon"
     address: "1/2/120"

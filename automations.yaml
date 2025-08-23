@@ -61,6 +61,11 @@
   - condition: state
     entity_id: binary_sensor.workday_sensor
     state: 'on'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.status
+      state: Vacation
   actions:
   - metadata: {}
     data:
@@ -592,6 +597,8 @@
       - if_lights_are_on_adjust_when_crossing_over
       - use_brightness
       include_bypass: []
+      include_ambient: ambient_enabled
+      ambient_light_sensor: sensor.hms_mbad_illuminance
 - id: '1737306029116'
   alias: Switch - Nikolai
   description: Nswitch konfig
@@ -677,13 +684,19 @@
         metadata: {}
         data: {}
         target:
-          entity_id: light.master_sov_spotter
+          entity_id:
+          - light.master_sov_spotter
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
       button_off_long_press:
       - action: light.turn_off
         metadata: {}
         data: {}
         target:
-          entity_id: light.master_sov_spotter
+          entity_id:
+          - light.master_sov_spotter
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
       button_up_short_press:
       - action: light.turn_on
         metadata: {}
@@ -703,7 +716,10 @@
         metadata: {}
         data: {}
         target:
-          entity_id: light.master_sov_spotter
+          entity_id:
+          - light.master_sov_spotter
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
       - action: light.turn_on
         metadata: {}
         data:
@@ -725,6 +741,8 @@
           entity_id:
           - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
           - light.master_sov_spotter
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
       button_off_short_press:
       - action: light.turn_off
         metadata: {}
@@ -733,6 +751,8 @@
           entity_id:
           - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
           - light.master_sov_spotter
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
       button_on_long_press:
       - action: scene.turn_on
         metadata: {}
@@ -841,6 +861,8 @@
           entity_id:
           - light.master_sov_spotter
           - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
       button_off_double_press:
       - action: light.turn_on
         metadata: {}
@@ -850,6 +872,8 @@
           entity_id:
           - light.master_sov_spotter
           - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
 - id: '1737848222035'
   alias: Temperatur - bad - natt
   description: ''
@@ -1087,4 +1111,17 @@
       temperature: 20
     target:
       entity_id: climate.bad
+  mode: single
+- id: '1748873321116'
+  alias: EnviroSensor1 - restart
+  description: ''
+  triggers:
+  - trigger: time
+    at: 01:00:00
+  conditions: []
+  actions:
+  - device_id: 3d0b5c5b87b08d9b52a4c39bd65efa46
+    domain: button
+    entity_id: 500a9bc720ae2814e0df0647e54aed6e
+    type: press
   mode: single

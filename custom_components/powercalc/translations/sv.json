@@ -201,6 +201,13 @@
         "description": "Select all the power sensors which are part of the tracked consumption. It is already automatically populated, but you can manually adjust it",
         "title": "Select power entities"
       },
+      "group_tracked_untracked_auto": {
+        "data": {
+          "exclude_entities": "Exclude entities"
+        },
+        "description": "Exclude specific entities from the auto tracked group",
+        "title": "Auto tracked configuration"
+      },
       "library": {
         "data": {
           "confirm_autodisovered_model": "Bekräfta modell"
@@ -402,6 +409,20 @@
     "deprecated_platform_yaml": {
       "description": "Att konfigurera sensorer med sensor->plattform har fasats ut. Du behöver ändra din konfiguration till powercalc->sensorer. Klicka på 'Läs mer' för ytterligare instruktioner.",
       "title": "Powercalc YAML konfiguration har flyttats"
+    },
+    "sub_profile": {
+      "fix_flow": {
+        "step": {
+          "sub_profile": {
+            "description": "This device has a model with multiple sub profiles. Select one that corresponds to the following entity of this device:\n\n\"{entity_id}\"\n\nManufacturer: {manufacturer}\nModel: {model}{remarks}",
+            "title": "Select correct sub profile",
+            "data": {
+              "sub_profile": "Sub profile"
+            }
+          }
+        }
+      },
+      "title": "Sub profile selection required for {entry}"
     }
   },
   "options": {
