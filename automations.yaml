@@ -727,153 +727,32 @@
         target:
           entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
 - id: '1737313048110'
-  alias: Switch - Kbryter bedrom
+  alias: Switch - GarasjeSwitch
   description: ''
   use_blueprint:
     path: sandervv/ZHA - Hue Dimmer Fully Configurable.yaml
     input:
       remote: b676bbe2efe194ed1d6567451e868aa8
       button_on_short_press:
-      - action: light.turn_on
+      - action: light.toggle
         metadata: {}
         data: {}
         target:
-          entity_id:
-          - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-          - light.master_sov_spotter
-          - light.master_sov_garderobe_spot
-          - light.master_sov_kontor_spot
+          device_id: 85d496e8daef509b51dfc5958fd0eaf5
       button_off_short_press:
       - action: light.turn_off
         metadata: {}
         data: {}
         target:
-          entity_id:
-          - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-          - light.master_sov_spotter
-          - light.master_sov_garderobe_spot
-          - light.master_sov_kontor_spot
-      button_on_long_press:
-      - action: scene.turn_on
-        metadata: {}
-        data: {}
-        target:
-          entity_id: scene.master_sov_kveld
+          device_id: 85d496e8daef509b51dfc5958fd0eaf5
+      button_on_long_press: []
       button_off_long_press: []
-      button_up_short_press:
-      - if:
-        - condition: state
-          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-          state: 'on'
-        then:
-        - action: light.turn_on
-          metadata: {}
-          data:
-            brightness_step_pct: 10
-          target:
-            entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-      - if:
-        - condition: state
-          entity_id: light.master_sov_spotter
-          state: 'on'
-        then:
-        - action: light.turn_on
-          metadata: {}
-          data:
-            brightness_step_pct: 10
-          target:
-            entity_id: light.master_sov_spotter
-      button_down_short_press:
-      - if:
-        - condition: state
-          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-          state: 'on'
-        then:
-        - action: light.turn_on
-          metadata: {}
-          data:
-            brightness_step_pct: -10
-          target:
-            entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-      - if:
-        - condition: state
-          entity_id: light.master_sov_spotter
-          state: 'on'
-        then:
-        - action: light.turn_on
-          metadata: {}
-          data:
-            brightness_step_pct: -10
-          target:
-            entity_id: light.master_sov_spotter
-      button_up_long_press:
-      - if:
-        - condition: state
-          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-          state: 'on'
-        then:
-        - action: light.turn_on
-          metadata: {}
-          data:
-            brightness_step_pct: 5
-          target:
-            entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-      - if:
-        - condition: state
-          entity_id: light.master_sov_spotter
-          state: 'on'
-        then:
-        - action: light.turn_on
-          metadata: {}
-          data:
-            brightness_step_pct: 5
-          target:
-            entity_id: light.master_sov_spotter
-      button_down_long_press:
-      - if:
-        - condition: state
-          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-          state: 'on'
-        then:
-        - action: light.turn_on
-          metadata: {}
-          data:
-            brightness_step_pct: -5
-          target:
-            entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-      - if:
-        - condition: state
-          entity_id: light.master_sov_spotter
-          state: 'on'
-        then:
-        - action: light.turn_on
-          metadata: {}
-          data:
-            brightness_step_pct: -5
-          target:
-            entity_id: light.master_sov_spotter
-      button_on_double_press:
-      - action: light.turn_on
-        metadata: {}
-        data:
-          brightness_pct: 100
-        target:
-          entity_id:
-          - light.master_sov_spotter
-          - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-          - light.master_sov_garderobe_spot
-          - light.master_sov_kontor_spot
-      button_off_double_press:
-      - action: light.turn_on
-        metadata: {}
-        data:
-          brightness_pct: 50
-        target:
-          entity_id:
-          - light.master_sov_spotter
-          - light.nabu_casa_ha_connect_zbt_1_sov_taklampe
-          - light.master_sov_garderobe_spot
-          - light.master_sov_kontor_spot
+      button_up_short_press: []
+      button_down_short_press: []
+      button_up_long_press: []
+      button_down_long_press: []
+      button_on_double_press: []
+      button_off_double_press: []
 - id: '1737848222035'
   alias: Temperatur - bad - natt
   description: ''
@@ -1125,3 +1004,23 @@
     entity_id: 500a9bc720ae2814e0df0647e54aed6e
     type: press
   mode: single
+- id: '1756754085833'
+  alias: Hue Media Taklys dimming bryter
+  description: ''
+  use_blueprint:
+    path: knx/relative-dimming.yaml
+    input:
+      target_lights:
+        entity_id: light.nabu_casa_ha_connect_zbt_1_hue_media_tak
+      switch_address: 1/2/12
+      dimm_address: 1/2/13
+- id: '1756755575704'
+  alias: Bryter - master sov lys over senga
+  description: ''
+  use_blueprint:
+    path: knx/relative-dimming.yaml
+    input:
+      target_lights:
+        entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+      switch_address: 1/2/114
+      dimm_address: 1/2/115
