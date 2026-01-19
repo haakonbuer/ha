@@ -524,7 +524,7 @@
   - action: input_select.select_option
     metadata: {}
     data:
-      option: Hjemme
+      option: Home
   mode: single
 - id: '1729719066348'
   alias: Bryter Stue Kjøkken - HKT2 (langt trykk)
@@ -615,6 +615,7 @@
           - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
           - light.ngo_light
           - light.soverom_1_downlights
+          - light.hue_mini_bulb_nikolai_light
       Hue_Press:
       - action: light.turn_off
         metadata: {}
@@ -624,6 +625,7 @@
           - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
           - light.ngo_light
           - light.soverom_1_downlights
+          - light.hue_mini_bulb_nikolai_light
       Up_Press:
       - action: light.turn_on
         metadata: {}
@@ -633,6 +635,7 @@
           entity_id:
           - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
           - light.ngo_light
+          - light.hue_mini_bulb_nikolai_light
       Down_Press:
       - action: light.turn_on
         metadata: {}
@@ -642,6 +645,7 @@
           entity_id:
           - light.nabu_casa_ha_connect_zbt_1_nikolai_taklampe
           - light.ngo_light
+          - light.hue_mini_bulb_nikolai_light
       Power_Press2x:
       - action: scene.turn_on
         metadata: {}
@@ -1024,3 +1028,31 @@
         entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
       switch_address: 1/2/114
       dimm_address: 1/2/115
+- id: '1762979582950'
+  alias: Skru på TV på kvelden
+  description: ''
+  triggers:
+  - trigger: time
+    at: '20:30:00'
+  conditions:
+  - condition: state
+    entity_id: input_select.status
+    state: Home
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.smartplugtvnede_switch
+  mode: single
+- id: '1768430844284'
+  alias: GarageLightAuto
+  description: ''
+  use_blueprint:
+    path: Blackshome/sensor-light.yaml
+    input:
+      motion_trigger:
+      - binary_sensor.hms_garage
+      light_switch:
+        entity_id: light.switch_garasje_lys_light
+      time_delay: 10

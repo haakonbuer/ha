@@ -261,3 +261,12 @@ ev_laveste_gass:
       device_id: 647046bf679310144fe0193084093650
   description: ''
   icon: mdi:ev-station
+coming_home:
+  sequence:
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.smartplugtvnede_switch
+  alias: Coming home
+  description: ''
