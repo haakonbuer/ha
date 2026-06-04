@@ -1,155 +1,556 @@
-"""Sensors provided by Homely."""
+"""Sensor platform for Homely."""
+
+from __future__ import annotations
+
 from collections.abc import Callable
-from dataclasses import dataclass
-import logging
+from typing import Any
 
-from homelypy.devices import Device
-
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorEntity,
-    SensorEntityDescription,
-)
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    SIGNAL_STRENGTH_DECIBELS,
-    UnitOfElectricPotential,
-    UnitOfEnergy,
-    UnitOfPower,
-    UnitOfTemperature,
-)
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
 )
 
-from .const import DOMAIN
-from .coordinator import HomelyHomeCoordinator
-from .homely_device import HomelyDevice
+from .const import (
+    CONF_ENABLE_DEBUG_SENSORS,
+    CONF_ENABLE_WEBSOCKET,
+    DEFAULT_ENABLE_DEBUG_SENSORS,
+    DEFAULT_ENABLE_WEBSOCKET,
+    DOMAIN,
+)
+from .device_state import get_current_device, is_device_available
+from .models import HomelyConfigEntry, get_entry_runtime_data
+from .naming import (
+    build_suggested_object_id,
+    get_device_area,
+    get_device_display_name,
+    humanize_label,
+)
+from .runtime_state import (
+    websocket_connection_state,
+)
+from .websocket import WEBSOCKET_STATUS_OPTIONS as SDK_WEBSOCKET_STATUS_OPTIONS
+from .websocket import normalize_websocket_status as _normalize_runtime_websocket_status
+from .sensors.discover import discover_device_sensors, _get_value_by_path
 
-_LOGGER = logging.getLogger(__name__)
+PARALLEL_UPDATES = 0
+SensorConfig = dict[str, Any]
+FallbackDataGetter = Callable[[], dict[str, Any] | None]
+DIAGNOSTIC_ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
+WEBSOCKET_STATUS_OPTIONS = [
+    "disabled",
+    *SDK_WEBSOCKET_STATUS_OPTIONS,
+]
+
+
+def _normalize_websocket_status(value: Any) -> str:
+    """Convert internal websocket status labels to stable enum states."""
+    return _normalize_runtime_websocket_status(value)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: HomelyConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Plate Relays as switch based on a config entry."""
-    homely_home: HomelyHomeCoordinator = hass.data[DOMAIN][entry.entry_id]
+    """Set up sensor entities for Homely devices."""
+    runtime_data = get_entry_runtime_data(entry)
+    coordinator = runtime_data.coordinator
+    data = coordinator.data or runtime_data.last_data or {}
+    location_id = runtime_data.location_id
+
+    def _fallback_data_getter() -> dict[str, Any] | None:
+        return runtime_data.last_data
+
+    websocket_enabled = bool(
+        entry.options.get(
+            CONF_ENABLE_WEBSOCKET,
+            entry.data.get(CONF_ENABLE_WEBSOCKET, DEFAULT_ENABLE_WEBSOCKET),
+        )
+    )
+    enable_debug_sensors = bool(
+        entry.options.get(
+            CONF_ENABLE_DEBUG_SENSORS,
+            entry.data.get(CONF_ENABLE_DEBUG_SENSORS, DEFAULT_ENABLE_DEBUG_SENSORS),
+        )
+    )
+
+    _DEBUG_SENSOR_SUFFIXES = [
+        "last_successful_poll",
+        "last_websocket_message",
+        "last_ws_device_update",
+    ]
+    if not enable_debug_sensors:
+        entity_registry = er.async_get(hass)
+        for suffix in _DEBUG_SENSOR_SUFFIXES:
+            unique_id = f"location_{location_id}_{suffix}"
+            entity_id = entity_registry.async_get_entity_id("sensor", DOMAIN, unique_id)
+            if entity_id:
+                entity_registry.async_remove(entity_id)
 
     entities: list[SensorEntity] = []
-    for homely_device in homely_home.devices.values():
-        if homely_device.homely_api_device.model_name == "EMI Norwegian HAN":
-            entities.extend(
-                [
-                    HomelySensorEntity(homely_home, homely_device, description)
-                    for description in HAN_SENSOR_ENTITY_DESCRIPTIONS
-                ]
+    if enable_debug_sensors:
+        entities.append(
+            HomelyRuntimeTimestampSensor(
+                coordinator,
+                entry,
+                location_id,
+                translation_key="last_successful_poll",
+                unique_suffix="last_successful_poll",
+                icon="mdi:clock-check-outline",
+                value_getter=lambda runtime_data: runtime_data.last_successful_poll_at,
             )
-        else:
-            entities.extend(
-                [
-                    HomelySensorEntity(homely_home, homely_device, description)
-                    for description in GENERIC_SENSOR_TYPES
-                ]
+        )
+    if websocket_enabled:
+        entities.append(
+            HomelyWebSocketStatusSensor(coordinator, hass, entry, location_id)
+        )
+        if enable_debug_sensors:
+            entities.append(
+                HomelyRuntimeTimestampSensor(
+                    coordinator,
+                    entry,
+                    location_id,
+                    translation_key="last_websocket_message",
+                    unique_suffix="last_websocket_message",
+                    icon="mdi:message-outline",
+                    value_getter=lambda runtime_data: runtime_data.last_websocket_event_at,
+                    extra_attributes_getter=lambda runtime_data: (
+                        {
+                            "event_type": runtime_data.last_websocket_event_type,
+                            **(runtime_data.last_ws_event_details or {}),
+                        }
+                        if runtime_data.last_websocket_event_type
+                        else None
+                    ),
+                )
             )
+            entities.append(
+                HomelyRuntimeStateSensor(
+                    coordinator,
+                    entry,
+                    location_id,
+                    translation_key="last_ws_device_update",
+                    unique_suffix="last_ws_device_update",
+                    icon="mdi:update",
+                    value_getter=_get_last_ws_device_name,
+                    extra_attributes_getter=_get_last_ws_device_attrs,
+                )
+            )
+
+    devices = data.get("devices", [])
+    if not isinstance(devices, list):
+        devices = []
+
+    for device in devices:
+        if not isinstance(device, dict):
+            continue
+        discovered = discover_device_sensors(device)
+
+        for sensor_config in discovered:
+            if sensor_config["type"] == "sensor":
+                entities.append(
+                    HomelySensor(
+                        coordinator,
+                        device,
+                        sensor_config,
+                        fallback_data_getter=_fallback_data_getter,
+                    )
+                )
+
     async_add_entities(entities)
 
 
-@dataclass
-class HomelySensorEntityDescription(SensorEntityDescription):
-    """Class describing a Homely sensor entity."""
-
-    value_fn: Callable[[Device], StateType] = lambda _: _
-
-
-GENERIC_SENSOR_TYPES: tuple[HomelySensorEntityDescription, ...] = (
-    HomelySensorEntityDescription(
-        key="Temperature",
-        name="Temperature",
-        device_class=SensorDeviceClass.TEMPERATURE,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        value_fn=lambda device: device.temperature.temperature,
-    ),
-    HomelySensorEntityDescription(
-        key="BatteryVoltage",
-        name="Battery voltage",
-        device_class=SensorDeviceClass.VOLTAGE,
-        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
-        value_fn=lambda device: device.battery.voltage,
-    ),
-    HomelySensorEntityDescription(
-        key="ZigbeeSignalStrength",
-        name="Zigbee signal strength",
-        device_class=SensorDeviceClass.SIGNAL_STRENGTH,
-        native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS,
-        value_fn=lambda device: device.diagnostic.network_link_strength,
-    ),
-)
-
-HAN_SENSOR_ENTITY_DESCRIPTIONS: tuple[HomelySensorEntityDescription, ...] = (
-    HomelySensorEntityDescription(
-        key="SummationDelivered",
-        name="Summation delivered",
-        device_class=SensorDeviceClass.ENERGY,
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        value_fn=lambda device: device.metering.summation_delivered / 1000,
-    ),
-    HomelySensorEntityDescription(
-        key="SummationReceived",
-        name="Summation received",
-        device_class=SensorDeviceClass.ENERGY,
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        value_fn=lambda device: device.metering.summation_received / 1000,
-    ),
-    HomelySensorEntityDescription(
-        key="Demand",
-        name="Demand",
-        device_class=SensorDeviceClass.POWER,
-        native_unit_of_measurement=UnitOfPower.KILO_WATT,
-        value_fn=lambda device: device.metering.demand / 1000,
-    ),
-)
+def _get_last_ws_device_name(runtime_data: Any) -> str | None:
+    """Return the name of the last device updated via websocket."""
+    if runtime_data.last_websocket_event_type != "device-state-changed":
+        return None
+    details = runtime_data.last_ws_event_details
+    if not isinstance(details, dict):
+        return None
+    device_id = details.get("device_id")
+    if not device_id:
+        return None
+    devices = (runtime_data.last_data or {}).get("devices") or []
+    for device in devices:
+        if isinstance(device, dict) and str(device.get("id")) == str(device_id):
+            return str(device.get("name") or device.get("modelName") or device_id)
+    return str(device_id)
 
 
-class HomelySensorEntity(CoordinatorEntity, SensorEntity):
-    """Homely sensor class."""
+def _get_last_ws_device_attrs(runtime_data: Any) -> dict[str, Any] | None:
+    """Return attributes for the last websocket device update."""
+    if runtime_data.last_websocket_event_type != "device-state-changed":
+        return None
+    details = runtime_data.last_ws_event_details
+    if not isinstance(details, dict) or not details:
+        return None
+    return dict(details)
 
-    _attr_has_entity_name = True
-    entity_description: HomelySensorEntityDescription
+
+class HomelyRuntimeStateSensor(CoordinatorEntity, SensorEntity):
+    """Generic runtime state sensor backed by location runtime metadata."""
 
     def __init__(
         self,
-        coordinator: DataUpdateCoordinator,
-        homely_device: HomelyDevice,
-        description: HomelySensorEntityDescription,
+        coordinator: DataUpdateCoordinator[dict[str, Any]],
+        entry: HomelyConfigEntry,
+        location_id: str,
+        *,
+        translation_key: str,
+        unique_suffix: str,
+        icon: str,
+        value_getter: Callable[[Any], Any],
+        extra_attributes_getter: Callable[[Any], dict[str, Any] | None] | None = None,
+        enabled_default: bool = False,
     ) -> None:
-        """Pass coordinator to CoordinatorEntity."""
         super().__init__(coordinator)
-        self.homely_device = homely_device
-        self.entity_description = description
-        self._homely_device_state: Device = self.get_homely_device_state()
-        self._attr_device_info = homely_device.device_info
-        self._attr_unique_id = f"{homely_device.homely_api_device.id}_{self.name}"
+        self._attr_has_entity_name = True
+        self._runtime_data = get_entry_runtime_data(entry)
+        self._value_getter = value_getter
+        self._extra_attributes_getter = extra_attributes_getter
+        self._attr_translation_key = translation_key
+        self._attr_unique_id = f"location_{location_id}_{unique_suffix}"
+        self._attr_icon = icon
+        self._attr_entity_category = DIAGNOSTIC_ENTITY_CATEGORY
+        self._attr_entity_registry_enabled_default = enabled_default
+        location_name = str(
+            (self._runtime_data.last_data or {}).get("name", "Location")
+        )
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, f"location_{location_id}")},
+            name=location_name,
+            manufacturer="Homely",
+            model="Homely",
+            entry_type=DeviceEntryType.SERVICE,
+        )
 
     @property
-    def native_value(self) -> StateType:
-        """Return the state."""
-        return self.entity_description.value_fn(self._homely_device_state)
+    def native_value(self) -> Any:
+        """Return the current sensor value."""
+        try:
+            return self._value_getter(self._runtime_data)
+        except (AttributeError, ValueError):
+            return None
 
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        self._homely_device_state = self.get_homely_device_state()
-        self.async_write_ha_state()
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Expose optional runtime metadata."""
+        if self._extra_attributes_getter is None:
+            return None
+        try:
+            return self._extra_attributes_getter(self._runtime_data)
+        except (AttributeError, ValueError):
+            return None
 
-    def get_homely_device_state(self) -> Device:
-        """Find my updated device."""
-        return next(
-            filter(
-                lambda device: (device.id == self.homely_device.homely_api_device.id),
-                self.coordinator.location.devices,
+
+class HomelySensor(CoordinatorEntity, SensorEntity):
+    """Homely sensor entity."""
+
+    def __init__(
+        self,
+        coordinator: DataUpdateCoordinator[dict[str, Any]],
+        device: dict[str, Any],
+        sensor_config: SensorConfig,
+        fallback_data_getter: FallbackDataGetter | None = None,
+    ) -> None:
+        super().__init__(coordinator)
+        self._attr_has_entity_name = True
+        self._device_id = str(device.get("id"))
+        self._path = str(sensor_config["path"])
+        self._transform_value = sensor_config.get("transform_value")
+        self._transform_device_value = sensor_config.get("transform_device_value")
+        self._unit = sensor_config.get("unit")
+        self._resolve_unit_from_device_value = sensor_config.get(
+            "resolve_unit_from_device_value"
+        )
+        configured_options = sensor_config.get("options")
+        self._options = (
+            [str(option) for option in configured_options]
+            if isinstance(configured_options, list)
+            else None
+        )
+        self._device_name = get_device_display_name(device)
+        self._fallback_data_getter = fallback_data_getter
+
+        sensor_name = sensor_config.get(
+            "resolved_name", sensor_config.get("name", "sensor")
+        )
+        translation_key = sensor_config.get("resolved_translation_key")
+        if translation_key:
+            self._attr_translation_key = translation_key
+        else:
+            self._attr_name = humanize_label(sensor_name)
+
+        device_suffix = sensor_config.get("device_suffix", sensor_config["name"])
+        self._attr_unique_id = f"{self._device_id}_{device_suffix}"
+        suggested_object_id = build_suggested_object_id(device, device_suffix)
+        if suggested_object_id:
+            self._attr_suggested_object_id = suggested_object_id
+        self._attr_entity_registry_enabled_default = bool(
+            sensor_config.get("enabled_default", True)
+        )
+
+        device_class = sensor_config.get("resolved_device_class")
+        if device_class is None:
+            device_class = sensor_config.get("device_class")
+        if device_class:
+            self._attr_device_class = device_class
+
+        if self._unit and not callable(self._resolve_unit_from_device_value):
+            self._attr_native_unit_of_measurement = self._unit
+
+        if sensor_config.get("state_class"):
+            self._attr_state_class = sensor_config["state_class"]
+
+        if sensor_config.get("icon"):
+            self._attr_icon = sensor_config["icon"]
+
+        if sensor_config.get("entity_category"):
+            category = sensor_config["entity_category"]
+            if category == "diagnostic":
+                self._attr_entity_category = DIAGNOSTIC_ENTITY_CATEGORY
+
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, self._device_id)},
+            name=self._device_name,
+            manufacturer="Homely",
+            model=device.get("modelName"),
+            serial_number=device.get("serialNumber"),
+            suggested_area=get_device_area(device),
+        )
+
+    def _get_current_device(self) -> dict[str, Any] | None:
+        """Return latest device payload from coordinator cache."""
+        current_device = get_current_device(self.coordinator.data, self._device_id)
+        if current_device is not None or self._fallback_data_getter is None:
+            return current_device
+        return get_current_device(self._fallback_data_getter(), self._device_id)
+
+    @property
+    def available(self) -> bool:
+        """Return whether the backing Homely device is available."""
+        return super().available and is_device_available(self._get_current_device())
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the current unit of measurement."""
+        if not callable(self._resolve_unit_from_device_value):
+            return self._unit
+
+        device = self._get_current_device()
+        if not device:
+            return None
+
+        value = _get_value_by_path(device, self._path)
+        try:
+            resolved_unit = self._resolve_unit_from_device_value(device, value)
+        except (TypeError, ValueError):
+            return self._unit
+        return resolved_unit if isinstance(resolved_unit, str) else None
+
+    @property
+    def native_value(self) -> Any:
+        """Return the current sensor value."""
+        device = self._get_current_device()
+        if not device:
+            return None
+
+        value = _get_value_by_path(device, self._path)
+        return self._transform_runtime_value(device, value)
+
+    def _transform_runtime_value(self, device: dict[str, Any], value: Any) -> Any:
+        """Apply configured transforms to a runtime value."""
+        if callable(self._transform_device_value):
+            try:
+                return self._transform_device_value(device, value)
+            except (TypeError, ValueError):
+                return value
+        if callable(self._transform_value):
+            try:
+                return self._transform_value(value)
+            except (TypeError, ValueError):
+                return value
+        return value
+
+    @property
+    def options(self) -> list[str] | None:
+        """Return enum options, including the current state if needed."""
+        if self._options is None:
+            return None
+
+        options = list(self._options)
+        if self.device_class != SensorDeviceClass.ENUM:
+            return options
+
+        value = self.native_value
+        if isinstance(value, str) and value not in options:
+            options.append(value)
+        return options
+
+
+class HomelyWebSocketStatusSensor(CoordinatorEntity, SensorEntity):
+    """Sensor for WebSocket connection status."""
+
+    def __init__(
+        self,
+        coordinator: DataUpdateCoordinator[dict[str, Any]],
+        hass: HomeAssistant,
+        entry: HomelyConfigEntry,
+        location_id: str,
+    ) -> None:
+        """Initialize the WebSocket status sensor."""
+        super().__init__(coordinator)
+        self._attr_has_entity_name = True
+        self._runtime_data = get_entry_runtime_data(entry)
+        self._websocket_enabled = bool(
+            entry.options.get(
+                CONF_ENABLE_WEBSOCKET,
+                entry.data.get(CONF_ENABLE_WEBSOCKET, DEFAULT_ENABLE_WEBSOCKET),
             )
         )
+        self._location_id = location_id
+        location_name = str(
+            (self._runtime_data.last_data or {}).get("name", "Location")
+        )
+
+        self._attr_translation_key = "websocket_status"
+        self._attr_unique_id = f"location_{location_id}_websocket_status"
+        self._attr_icon = "mdi:web"
+        self._attr_entity_category = DIAGNOSTIC_ENTITY_CATEGORY
+        self._attr_entity_registry_enabled_default = False
+        self._attr_device_class = SensorDeviceClass.ENUM
+        self._attr_options = WEBSOCKET_STATUS_OPTIONS
+
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, f"location_{location_id}")},
+            name=location_name,
+            manufacturer="Homely",
+            model="Homely",
+            entry_type=DeviceEntryType.SERVICE,
+        )
+        self._status_listener: Any = None
+
+    async def async_added_to_hass(self) -> None:
+        """Register for immediate websocket status callbacks."""
+        await super().async_added_to_hass()
+        listeners = getattr(self._runtime_data, "ws_status_listeners", None)
+        if not isinstance(listeners, list):
+            return
+
+        def _listener() -> None:
+            # Schedule state writes on the Home Assistant event loop.
+            if self.hass is not None and self.entity_id is not None:
+                self.async_schedule_update_ha_state()
+
+        listeners.append(_listener)
+        self._status_listener = _listener
+        self.async_schedule_update_ha_state()
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Unregister websocket status callback."""
+        listeners = getattr(self._runtime_data, "ws_status_listeners", None)
+        if isinstance(listeners, list) and self._status_listener in listeners:
+            listeners.remove(self._status_listener)
+        self._status_listener = None
+        await super().async_will_remove_from_hass()
+
+    @property
+    def native_value(self) -> str:
+        """Return the WebSocket connection status."""
+        try:
+            if not self._websocket_enabled:
+                return "disabled"
+
+            return websocket_connection_state(self._runtime_data).effective_status
+        except (AttributeError, ValueError):
+            return "unknown"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, str] | None:
+        """Expose last websocket status reason for debugging."""
+        attributes: dict[str, str] = {}
+        try:
+            websocket_state = websocket_connection_state(self._runtime_data)
+            reason = self._runtime_data.ws_status_reason
+            if reason:
+                attributes["reason"] = reason
+            if websocket_state.status_mismatch:
+                attributes["reported_status"] = websocket_state.reported_status
+            last_disconnect_reason = getattr(
+                self._runtime_data,
+                "last_disconnect_reason",
+                None,
+            )
+            if (
+                isinstance(last_disconnect_reason, str)
+                and last_disconnect_reason
+                and last_disconnect_reason != reason
+            ):
+                attributes["last_disconnect_reason"] = last_disconnect_reason
+        except (AttributeError, ValueError):
+            return None
+        return attributes or None
+
+
+class HomelyRuntimeTimestampSensor(CoordinatorEntity, SensorEntity):
+    """Timestamp sensor backed by runtime metadata for a location."""
+
+    def __init__(
+        self,
+        coordinator: DataUpdateCoordinator[dict[str, Any]],
+        entry: HomelyConfigEntry,
+        location_id: str,
+        *,
+        translation_key: str,
+        unique_suffix: str,
+        icon: str,
+        value_getter: Callable[[Any], Any],
+        extra_attributes_getter: Callable[[Any], dict[str, Any] | None] | None = None,
+        enabled_default: bool = True,
+    ) -> None:
+        super().__init__(coordinator)
+        self._attr_has_entity_name = True
+        self._runtime_data = get_entry_runtime_data(entry)
+        self._value_getter = value_getter
+        self._extra_attributes_getter = extra_attributes_getter
+        self._attr_translation_key = translation_key
+        self._attr_unique_id = f"location_{location_id}_{unique_suffix}"
+        self._attr_icon = icon
+        self._attr_entity_category = DIAGNOSTIC_ENTITY_CATEGORY
+        self._attr_entity_registry_enabled_default = enabled_default
+        self._attr_device_class = SensorDeviceClass.TIMESTAMP
+        location_name = str(
+            (self._runtime_data.last_data or {}).get("name", "Location")
+        )
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, f"location_{location_id}")},
+            name=location_name,
+            manufacturer="Homely",
+            model="Homely",
+            entry_type=DeviceEntryType.SERVICE,
+        )
+
+    @property
+    def native_value(self) -> Any:
+        """Return the current timestamp value."""
+        try:
+            value = self._value_getter(self._runtime_data)
+        except (AttributeError, ValueError):
+            return None
+        return value
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Expose optional runtime metadata."""
+        if self._extra_attributes_getter is None:
+            return None
+        try:
+            return self._extra_attributes_getter(self._runtime_data)
+        except (AttributeError, ValueError):
+            return None

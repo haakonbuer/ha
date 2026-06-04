@@ -1,105 +1,119 @@
-"""Support for Abode Security System alarm control panels."""
+"""Alarm control panel for Homely."""
+
 from __future__ import annotations
 
-from homelypy.devices import AlarmStates
+import logging
+from typing import Any
 
-import homeassistant.components.alarm_control_panel as alarm
-from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_NIGHT,
-    STATE_ALARM_ARMING,
-    STATE_ALARM_DISARMED,
-    STATE_ALARM_PENDING,
-    STATE_ALARM_TRIGGERED,
+from homeassistant.components.alarm_control_panel import AlarmControlPanelEntity
+from homeassistant.components.alarm_control_panel.const import (
+    AlarmControlPanelState,
 )
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+)
 
 from .const import DOMAIN
-from .coordinator import HomelyHomeCoordinator
+from .models import HomelyConfigEntry, get_entry_runtime_data
 
-ICON = "mdi:security"
+_LOGGER = logging.getLogger(__name__)
+PARALLEL_UPDATES = 0
+
+STATE_MAP: dict[str, AlarmControlPanelState] = {
+    # Main states
+    "DISARMED": AlarmControlPanelState.DISARMED,
+    "ARMED_AWAY": AlarmControlPanelState.ARMED_AWAY,
+    "ARMED_NIGHT": AlarmControlPanelState.ARMED_NIGHT,
+    "ARMED_STAY": AlarmControlPanelState.ARMED_HOME,
+    "ARMED_PARTLY": AlarmControlPanelState.ARMED_HOME,
+    # Pending/transitional states
+    "ARM_PENDING": AlarmControlPanelState.ARMING,
+    "ARM_STAY_PENDING": AlarmControlPanelState.ARMING,
+    "ARM_NIGHT_PENDING": AlarmControlPanelState.ARMING,
+    "ALARM_PENDING": AlarmControlPanelState.ARMING,
+    "ALARM_STAY_PENDING": AlarmControlPanelState.ARMING,
+    "ARMED_NIGHT_PENDING": AlarmControlPanelState.ARMING,
+    "ARMED_AWAY_PENDING": AlarmControlPanelState.ARMING,
+    "TRIGGERED": AlarmControlPanelState.TRIGGERED,
+    "BREACHED": AlarmControlPanelState.TRIGGERED,
+}
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: HomelyConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Homely alarm control panel device."""
-    homely_home: HomelyHomeCoordinator = hass.data[DOMAIN][entry.entry_id]
+    """Set up the Homely alarm panel entity."""
+    runtime_data = get_entry_runtime_data(entry)
+    coordinator = runtime_data.coordinator
+    location_id = runtime_data.location_id
+    async_add_entities([HomelyAlarmPanel(coordinator, location_id)])
 
-    async_add_entities([HomelyAlarm(homely_home)])
 
-
-class HomelyAlarm(alarm.AlarmControlPanelEntity):
-    """An alarm_control_panel implementation for Homely."""
-
-    _attr_icon = ICON
-    _attr_code_arm_required = True
-    _attr_has_entity_name = True
-    _attr_supported_features = (
-        AlarmControlPanelEntityFeature(0)
-        # AlarmControlPanelEntityFeature.ARM_HOME
-        # | AlarmControlPanelEntityFeature.ARM_AWAY
-        # | AlarmControlPanelEntityFeature.ARM_NIGHT
-    )
+class HomelyAlarmPanel(CoordinatorEntity, AlarmControlPanelEntity):
+    """Read-only alarm state for a Homely location."""
 
     def __init__(
         self,
-        coordinator: HomelyHomeCoordinator,
+        coordinator: DataUpdateCoordinator[dict[str, Any]],
+        location_id: str,
     ) -> None:
-        """Pass coordinator to CoordinatorEntity."""
-        super().__init__()
-        self.coordinator = coordinator
-        self.coordinator.alarm_entity = self
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        self.async_write_ha_state()
+        super().__init__(coordinator)
+        self._attr_has_entity_name = True
+        self._location_id = location_id
+        self._last_unknown_state: str | None = None
+        location_name = str(
+            (coordinator.data or {}).get("name") or f"Homely location {location_id}"
+        )
+        self._attr_name = None
+        self._attr_unique_id = f"location_{location_id}_alarm_panel"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, f"location_{location_id}")},
+            name=location_name,
+            manufacturer="Homely",
+            model="Homely",
+            entry_type=DeviceEntryType.SERVICE,
+        )
 
     @property
-    def state(self) -> str | None:
-        """Return the state of the device."""
-        if self.coordinator.location.alarm_state == AlarmStates.DISARMED.value:
-            return STATE_ALARM_DISARMED
-        if self.coordinator.location.alarm_state == AlarmStates.ARMED_AWAY.value:
-            return STATE_ALARM_ARMED_AWAY
-        if self.coordinator.location.alarm_state == AlarmStates.ARMED_STAY.value:
-            return STATE_ALARM_ARMED_HOME
-        if self.coordinator.location.alarm_state == AlarmStates.ARMED_NIGHT.value:
-            return STATE_ALARM_ARMED_NIGHT
-        if self.coordinator.location.alarm_state in (
-            AlarmStates.ARM_STAY_PENDING.value,
-            AlarmStates.ARM_PENDING.value,
-            AlarmStates.ARM_NIGHT_PENDING.value,
-        ):
-            print("Alarm arming")
-            return STATE_ALARM_ARMING
-        if self.coordinator.location.alarm_state == AlarmStates.ALARM_PENDING.value:
-            return STATE_ALARM_PENDING
-        if self.coordinator.location.alarm_state == AlarmStates.BREACHED.value:
-            return STATE_ALARM_TRIGGERED
+    def alarm_state(self) -> AlarmControlPanelState | None:
+        """Return the mapped alarm state."""
+        data = self.coordinator.data or {}
+
+        # Top-level alarmState is present in polling responses and updated by websocket helpers.
+        api_state = data.get("alarmState")
+
+        # Fallback to nested features path for older payload variants.
+        if api_state is None:
+            api_state = (
+                data.get("features", {})
+                .get("alarm", {})
+                .get("states", {})
+                .get("alarm", {})
+                .get("value")
+            )
+
+        if api_state is not None:
+            mapped_state = STATE_MAP.get(str(api_state))
+            if mapped_state:
+                self._last_unknown_state = None
+                return mapped_state
+            api_state_str = str(api_state)
+            if api_state_str != self._last_unknown_state:
+                self._last_unknown_state = api_state_str
+                location_hint = (
+                    self._location_id
+                    if len(self._location_id) <= 8
+                    else f"{self._location_id[:8]}..."
+                )
+                _LOGGER.warning(
+                    "Unknown alarm state from API location=%s state=%s. Please open a GitHub issue if this keeps happening.",
+                    location_hint,
+                    api_state_str,
+                )
         return None
-
-    # def alarm_disarm(self, code: str | None = None) -> None:
-    #     """Send disarm command."""
-    #     # Not supported
-    #     pass
-
-    # def alarm_arm_home(self, code: str | None = None) -> None:
-    #     """Send arm home command."""
-    #     # Not supported
-    #     pass
-
-    # def alarm_arm_away(self, code: str | None = None) -> None:
-    #     """Send arm away command."""
-    #     # Not supported
-    #     pass
-
-    @property
-    def extra_state_attributes(self) -> dict[str, str]:
-        """Return the state attributes."""
-        return {}

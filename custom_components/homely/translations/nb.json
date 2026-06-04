@@ -1,0 +1,169 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sett opp Homely Alarm",
+        "description": "Skriv inn e-postadresse og passord for Homely nedenfor.",
+        "data": {
+          "username": "E-postadresse",
+          "password": "Passord"
+        }
+      },
+      "select_location": {
+        "title": "Velg hjem",
+        "description": "Velg hvilket hjem i Homely som skal legges til. Velg \"Legg til alle hjem\" for å legge til alle tilgjengelige hjem.",
+        "data": {
+          "location_id": "Hjem"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Koble til Homely på nytt",
+        "description": "Oppdater e-postadresse og passord for Homely.",
+        "data": {
+          "username": "E-postadresse",
+          "password": "Passord"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kunne ikke koble til Homely akkurat nå. Sjekk internettforbindelsen og prøv igjen.",
+      "invalid_auth": "Feil brukernavn eller passord.",
+      "invalid_location": "Det valgte hjemmet er ikke gyldig for denne kontoen.",
+      "invalid_scan_interval": "Oppdateringsintervallet må være 30 sekunder eller høyere.",
+      "no_homes": "Fant ingen hjem på denne kontoen.",
+      "unknown": "Det oppstod en uventet feil"
+    },
+    "abort": {
+      "already_configured": "Dette hjemmet er allerede konfigurert",
+      "reauth_successful": "Påloggingen ble oppdatert"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Avanserte innstillinger",
+        "description": "Velg hvordan Homely-integrasjonen skal oppdatere data.",
+        "data": {
+          "scan_interval": "Vanlig API-pollingintervall (sekunder, minimum 30)",
+          "enable_websocket": "Aktiver direkteoppdateringer via WebSocket",
+          "poll_when_websocket": "Fortsett vanlig API-polling også når direkteoppdateringer er aktive",
+          "enable_debug_sensors": "Aktiver feilsøkingssensorer (siste polling, siste oppdatering, tilkoblingstellere)"
+        }
+      }
+    },
+    "error": {
+      "invalid_scan_interval": "Oppdateringsintervallet må være 30 sekunder eller høyere.",
+      "unknown": "Det oppstod en uventet feil"
+    }
+  },
+  "entity": {
+    "alarm_control_panel": {},
+    "binary_sensor": {
+      "motion": {
+        "name": "Bevegelse"
+      },
+      "contact": {
+        "name": "Kontakt"
+      },
+      "fire": {
+        "name": "Brann"
+      },
+      "tamper": {
+        "name": "Sabotasje"
+      },
+      "flood": {
+        "name": "Vannlekkasje"
+      },
+      "battery_low": {
+        "name": "Lavt batteri"
+      },
+      "battery_defect": {
+        "name": "Batterifeil"
+      },
+      "door": {
+        "name": "Dør"
+      },
+      "low_battery": {
+        "name": "Lavt batteri"
+      },
+      "jammed": {
+        "name": "Blokkert"
+      },
+      "any_battery_problem": {
+        "name": "Samlet batteristatus"
+      },
+      "metering_check": {
+        "name": "Målersjekk"
+      },
+      "online": {
+        "name": "Tilkoblet"
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "Temperatur"
+      },
+      "motion_sensitivity": {
+        "name": "Bevegelsessensitivitet"
+      },
+      "sound_volume": {
+        "name": "Lydnivå",
+        "state": {
+          "muted": "Lydløs",
+          "low": "Lav",
+          "high": "Høy"
+        }
+      },
+      "language": {
+        "name": "Språk",
+        "state": {
+          "no": "Norsk",
+          "en": "Engelsk",
+          "sv": "Svensk",
+          "da": "Dansk"
+        }
+      },
+      "battery_voltage": {
+        "name": "Batterispenning"
+      },
+      "link_quality": {
+        "name": "Signalkvalitet"
+      },
+      "network_link_address": {
+        "name": "Nettverksadresse"
+      },
+      "error_code": {
+        "name": "Feilkode"
+      },
+      "consumption": {
+        "name": "Forbruk"
+      },
+      "production": {
+        "name": "Produksjon"
+      },
+      "demand": {
+        "name": "Effekt"
+      },
+      "websocket_status": {
+        "name": "WebSocket-status",
+        "state": {
+          "disabled": "Deaktivert",
+          "not_initialized": "Ikke startet",
+          "connecting": "Kobler til",
+          "connected": "Tilkoblet",
+          "disconnected": "Frakoblet",
+          "unknown": "Ukjent"
+        }
+      },
+      "last_successful_poll": {
+        "name": "Siste vellykkede API-polling"
+      },
+      "last_websocket_message": {
+        "name": "Siste WebSocket-oppdatering"
+      },
+      "last_ws_device_update": {
+        "name": "Sist oppdatert enhet"
+      }
+    }
+  }
+}

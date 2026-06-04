@@ -2,28 +2,177 @@
   "config": {
     "step": {
       "user": {
-        "title": "Authentication",
-        "description": "Fill in your Homely login information. This is the same as used in the app.",
+        "title": "Homely Alarm Setup",
+        "description": "Enter your Homely credentials below.",
         "data": {
-          "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]"
+          "username": "Homely Email",
+          "password": "Homely password"
         }
       },
-      "location": {
-        "title": "Location",
-        "description": "Select your desired location",
+      "select_location": {
+        "title": "Choose location",
+        "description": "Select which Homely home to add. Choose \"Add all homes\" to add every available home.",
         "data": {
-          "location": "[%key:common::config_flow::data::location%]"
+          "location_id": "Location"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reconnect Homely",
+        "description": "Your Homely credentials need to be updated.",
+        "data": {
+          "username": "Homely Email",
+          "password": "Homely password"
+        }
+      },
+      "reconfigure": {
+        "title": "Choose location",
+        "description": "Select a different Homely location for this integration entry.",
+        "data": {
+          "location_id": "Location"
         }
       }
     },
     "error": {
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
+      "cannot_connect": "Could not connect to Homely right now. Check internet connection and try again.",
+      "invalid_auth": "Incorrect username or password.",
+      "invalid_location": "The selected location is not valid for this account.",
+      "invalid_scan_interval": "Update interval must be 30 seconds or higher.",
+      "no_homes": "No homes were found on this account.",
+      "unknown": "Unexpected error occurred"
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "This location is already configured",
+      "cannot_connect": "Could not connect to Homely right now. Check internet connection and try again.",
+      "cannot_reconfigure": "Home Assistant could not switch this entry to the selected location.",
+      "no_homes": "No homes were found on this account.",
+      "reauth_required": "Your Homely credentials must be updated before changing location.",
+      "reauth_successful": "Re-authentication was successful",
+      "reconfigure_successful": "Reconfiguration was successful"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Advanced Settings",
+        "description": "Configure how the Homely integration refreshes data.",
+        "data": {
+          "scan_interval": "Regular API polling interval (seconds, minimum 30)",
+          "enable_websocket": "Enable live updates via WebSocket",
+          "poll_when_websocket": "Continue regular API polling while live updates are active"
+        }
+      }
+    },
+    "error": {
+      "invalid_scan_interval": "Scan interval must be 30 seconds or higher.",
+      "no_homes": "No homes were found on this account.",
+      "unknown": "Unexpected error occurred"
+    }
+  },
+  "entity": {
+    "alarm_control_panel": {},
+    "binary_sensor": {
+      "motion": {
+        "name": "Motion"
+      },
+      "contact": {
+        "name": "Contact"
+      },
+      "fire": {
+        "name": "Fire"
+      },
+      "tamper": {
+        "name": "Tamper"
+      },
+      "flood": {
+        "name": "Flood"
+      },
+      "battery_low": {
+        "name": "Battery low"
+      },
+      "battery_defect": {
+        "name": "Battery defect"
+      },
+      "door": {
+        "name": "Door"
+      },
+      "low_battery": {
+        "name": "Low battery"
+      },
+      "jammed": {
+        "name": "Jammed"
+      },
+      "any_battery_problem": {
+        "name": "Battery problem"
+      },
+      "metering_check": {
+        "name": "Metering check"
+      },
+      "online": {
+        "name": "Online"
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "Temperature"
+      },
+      "motion_sensitivity": {
+        "name": "Motion sensitivity"
+      },
+      "sound_volume": {
+        "name": "Sound volume",
+        "state": {
+          "muted": "Muted",
+          "low": "Low",
+          "high": "High"
+        }
+      },
+      "language": {
+        "name": "Language",
+        "state": {
+          "no": "Norwegian",
+          "en": "English",
+          "sv": "Swedish",
+          "da": "Danish"
+        }
+      },
+      "battery_voltage": {
+        "name": "Battery voltage"
+      },
+      "link_quality": {
+        "name": "Link quality"
+      },
+      "network_link_address": {
+        "name": "Network link address"
+      },
+      "error_code": {
+        "name": "Error code"
+      },
+      "consumption": {
+        "name": "Consumption"
+      },
+      "production": {
+        "name": "Production"
+      },
+      "demand": {
+        "name": "Demand"
+      },
+      "websocket_status": {
+        "name": "Live update connection status",
+        "state": {
+          "disabled": "Disabled",
+          "not_initialized": "Not started",
+          "connecting": "Connecting",
+          "connected": "Connected",
+          "disconnected": "Disconnected",
+          "unknown": "Unknown"
+        }
+      },
+      "last_successful_poll": {
+        "name": "Last successful API poll"
+      },
+      "last_websocket_message": {
+        "name": "Last received live update"
+      }
     }
   }
 }

@@ -1,12 +1,14 @@
 {
   "domain": "homely",
   "name": "Homely",
+  "codeowners": ["@ludvikroed"],
   "config_flow": true,
-  "documentation": "https://www.home-assistant.io/integrations/homely",
-  "requirements": ["homelypy==0.1.15"],
+  "dependencies": [],
+  "documentation": "https://github.com/ludvikroed/homely-integration/blob/main/README.md",
   "integration_type": "hub",
-  "codeowners": ["@kolaf"],
   "iot_class": "cloud_push",
-  "loggers": ["homelypy"], 
-  "version": "0.1.5"
+  "issue_tracker": "https://github.com/ludvikroed/homely-integration/issues",
+  "loggers": ["custom_components.homely", "homely"],
+  "requirements": ["python-homely==0.1.5"],
+  "version": "1.4.1"
 }
