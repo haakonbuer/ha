@@ -1,7 +1,11 @@
 # KNX configuration  
 
-
 number:
+
+  - name: "Klesskap Katharina styrke"
+    address: "1/2/128"
+    state_address: "1/2/130"
+    type: percent
 
   - name: "Dali dim tid"
     address: "0/0/150"
@@ -603,3 +607,6 @@ switch:
     address: "1/2/155"
     state_address: "1/2/117"
 
+  - name: "Klesskap Katharina (alt2)"
+    address: "1/2/126"
+    state_address: "1/2/129"
