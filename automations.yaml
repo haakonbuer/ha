@@ -239,32 +239,43 @@
 - id: '1725914676383'
   alias: Utelys på kveld
   description: Utendørslys på om kvelden
-  trigger:
-  - platform: numeric_state
-    entity_id: sun.sun
+  triggers:
+  - entity_id: sun.sun
     attribute: elevation
-    below: -4
-  condition: []
-  action:
+    below: -2
+    trigger: numeric_state
+  conditions: []
+  actions:
   - action: switch.turn_on
     target:
       entity_id: switch.utelys
     data: {}
+  - action: light.turn_on
+    metadata: {}
+    target:
+      entity_id: light.gledopto_garagestrip
+    data:
+      brightness_pct: 40
   mode: single
 - id: '1725915279630'
   alias: Utelys av morgen
   description: Skrur av utelyset når solen står opp
-  trigger:
-  - platform: sun
-    event: sunrise
+  triggers:
+  - event: sunrise
     offset: 0
-  condition: []
-  action:
+    trigger: sun
+  conditions: []
+  actions:
   - action: switch.turn_off
     metadata: {}
     data: {}
     target:
       entity_id: switch.utelys
+  - action: light.turn_off
+    metadata: {}
+    target:
+      entity_id: light.gledopto_garagestrip
+    data: {}
   mode: single
 - id: '1725915955893'
   alias: Barnerom kveld

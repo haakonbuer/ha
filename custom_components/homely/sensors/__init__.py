@@ -67,16 +67,20 @@ SENSORS: list[dict[str, Any]] = [
         "type": "binary_sensor",
         "name": "alarm",
         "get_translation_key": lambda device: (
-            "motion" if "motion" in device.get("modelName", "").lower() else "contact"
+            "motion"
+            if "motion" in str(device.get("modelName") or "").lower()
+            else "contact"
         ),
         "device_class": BinarySensorDeviceClass.DOOR,
         "device_suffix": "alarm",
         "get_name": lambda device: (
-            "motion" if "motion" in device.get("modelName", "").lower() else "contact"
+            "motion"
+            if "motion" in str(device.get("modelName") or "").lower()
+            else "contact"
         ),
         "get_device_class": lambda device: (
             BinarySensorDeviceClass.MOTION
-            if "motion" in device.get("modelName", "").lower()
+            if "motion" in str(device.get("modelName") or "").lower()
             else BinarySensorDeviceClass.DOOR
         ),
     },
@@ -137,7 +141,6 @@ SENSORS: list[dict[str, Any]] = [
         "device_class": None,
         "device_suffix": "battery_defect",
         "entity_category": "diagnostic",
-        "enabled_default": False,
         "icon": "mdi:battery-alert",
     },
     # Practical lock/report sensors (created only when available)
@@ -184,7 +187,6 @@ SENSORS: list[dict[str, Any]] = [
         "translation_key": "metering_check",
         "device_suffix": "metering_check",
         "entity_category": "diagnostic",
-        "enabled_default": False,
         "icon": "mdi:counter",
     },
     # Temperature sensors
@@ -235,7 +237,6 @@ SENSORS: list[dict[str, Any]] = [
         "unit": "V",
         "device_suffix": "battery_voltage",
         "entity_category": "diagnostic",
-        "enabled_default": False,
     },
     # Diagnostic sensors
     {
@@ -248,7 +249,6 @@ SENSORS: list[dict[str, Any]] = [
         "unit": "%",
         "device_suffix": "networklinkstrength",
         "entity_category": "diagnostic",
-        "enabled_default": False,
         "icon": "mdi:wifi",
     },
     {
@@ -260,7 +260,6 @@ SENSORS: list[dict[str, Any]] = [
         "device_class": None,
         "device_suffix": "networklinkaddress",
         "entity_category": "diagnostic",
-        "enabled_default": False,
         "icon": "mdi:identifier",
     },
     {

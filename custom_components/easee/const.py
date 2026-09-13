@@ -16,7 +16,7 @@ from homeassistant.helpers.entity import EntityCategory
 
 DOMAIN = "easee"
 TIMEOUT = 30
-VERSION = "0.9.73"
+VERSION = "0.9.74"
 MIN_HA_VERSION = "2025.7.0"
 CONF_MONITORED_SITES = "monitored_sites"
 MANUFACTURER = "Easee"
@@ -119,6 +119,7 @@ chargerObservations = {
     ChargerStreamData.state_fatalErrorCode.value,
     ChargerStreamData.state_connectedToCloud.value,
     ChargerStreamData.state_cloudDisconnectReason.value,
+    ChargerStreamData.state_pilotMode.value,
     ChargerStreamData.schedule_chargingSchedule.value,
 }
 
@@ -769,6 +770,26 @@ OPTIONAL_EASEE_ENTITIES = {
         "enabled_default": True,
         "entity_category": EntityCategory.CONFIG,
     },
+    "pilot_mode": {
+        "key": "state.pilotMode",
+        "attrs": [],
+        "units": None,
+        "convert_units_func": "map_pilot_mode",
+        "translation_key": "pilot_mode",
+        "device_class": None,
+        "enabled_default": False,
+        "entity_category": EntityCategory.DIAGNOSTIC,
+    },
+    "operator": {
+        "key": "state.operatorName",
+        "attrs": [
+            "state.operatorID",
+        ],
+        "units": None,
+        "convert_units_func": None,
+        "device_class": None,
+        "translation_key": "operator",
+    }
 }
 
 EASEE_EQ_ENTITIES = {

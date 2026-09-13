@@ -5,7 +5,7 @@
         "title": "Homely Alarm Setup",
         "description": "Enter your Homely credentials below.",
         "data": {
-          "username": "Homely Email",
+          "username": "Homely email address",
           "password": "Homely password"
         }
       },
@@ -20,40 +20,31 @@
         "title": "Reconnect Homely",
         "description": "Your Homely credentials need to be updated.",
         "data": {
-          "username": "Homely Email",
+          "username": "Homely email address",
           "password": "Homely password"
         }
       }
     },
     "error": {
       "cannot_connect": "Could not connect to Homely right now. Check internet connection and try again.",
-      "invalid_auth": "Incorrect username or password.",
+      "invalid_auth": "Incorrect email address or password.",
       "invalid_location": "The selected location is not valid for this account.",
-      "invalid_scan_interval": "Update interval must be 30 seconds or higher.",
+      "invalid_scan_interval": "Update interval must be at least 30 seconds.",
       "no_homes": "No homes were found on this account.",
-      "unknown": "Unexpected error occurred"
+      "unknown": "An unexpected error occurred."
     },
     "abort": {
-      "already_configured": "This location is already configured",
-      "reauth_successful": "Re-authentication was successful"
+      "already_configured": "This location is already configured.",
+      "invalid_auth": "Incorrect email address or password.",
+      "invalid_location": "The selected location is not valid for this account.",
+      "reauth_successful": "Re-authentication was successful.",
+      "unknown": "An unexpected error occurred."
     }
   },
-  "options": {
-    "step": {
-      "init": {
-        "title": "Advanced Settings",
-        "description": "Configure how the Homely integration refreshes data.",
-        "data": {
-          "scan_interval": "Regular API polling interval (seconds, minimum 30)",
-          "enable_websocket": "Enable live updates via WebSocket",
-          "poll_when_websocket": "Continue regular API polling while live updates are active",
-          "enable_debug_sensors": "Enable debug sensors (last poll, last update, reconnect count)"
-        }
-      }
-    },
-    "error": {
-      "invalid_scan_interval": "Scan interval must be 30 seconds or higher.",
-      "unknown": "Unexpected error occurred"
+  "issues": {
+    "missing_devices": {
+      "title": "Homely devices are no longer reported",
+      "description": "Homely has stopped reporting registered devices for **{home}**. Number of affected devices: {count}. The removal was confirmed by two valid API snapshots:\n\n{devices}\n\nCheck whether the devices are still available in Homely. If they were intentionally removed, open the Homely integration in **Settings > Devices & services** and delete the stale devices from Home Assistant. This issue closes automatically when the devices return or are deleted."
     }
   },
   "entity": {
@@ -147,7 +138,6 @@
       "websocket_status": {
         "name": "Live update connection status",
         "state": {
-          "disabled": "Disabled",
           "not_initialized": "Not started",
           "connecting": "Connecting",
           "connected": "Connected",
@@ -155,14 +145,16 @@
           "unknown": "Unknown"
         }
       },
-      "last_successful_poll": {
-        "name": "Last successful API poll"
-      },
-      "last_websocket_message": {
-        "name": "Last received live update"
-      },
-      "last_ws_device_update": {
-        "name": "Last updated device"
+      "api_connection": {
+        "name": "Last cloud API poll",
+        "state": {
+          "not_run": "Not run",
+          "success": "Success",
+          "failed": "Failed",
+          "failed_429": "Failed (429)",
+          "failed_503": "Failed (503)",
+          "unknown": "Unknown"
+        }
       }
     }
   }

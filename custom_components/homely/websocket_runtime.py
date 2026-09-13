@@ -2,19 +2,22 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import timedelta
 from typing import Any, Protocol
 
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .models import HomelyConfigEntry, HomelyRuntimeData
 from .runtime_state import (
     device_id_snapshot,
+    record_last_armed,
+    record_last_disarmed,
     record_websocket_event,
     record_websocket_watchdog_recovery,
     update_runtime_websocket_state,
@@ -28,12 +31,14 @@ type IdentifierFormatter = Callable[[Any], str | None]
 type JsonDebugFormatter = Callable[[Any], str]
 type RedactionHelper = Callable[[Any], Any]
 type WebSocketApplyCallable = Callable[[dict[str, Any], dict[str, Any]], dict[str, Any]]
+type SnapshotSaver = Callable[[dict[str, Any]], Awaitable[None]]
 
-WEBSOCKET_CONNECTED_FALLBACK_POLL_INTERVAL = timedelta(hours=6)
+WEBSOCKET_CONNECTED_FALLBACK_POLL_INTERVAL = timedelta(hours=24)
 WEBSOCKET_HEALTH_WATCHDOG_INTERVAL = timedelta(minutes=1)
 WEBSOCKET_WATCHDOG_RECONNECT_DEBOUNCE_SECONDS = 90
 WEBSOCKET_WATCHDOG_WARNING_THRESHOLD = 3
 WEBSOCKET_WATCHDOG_WARNING_DEBOUNCE_SECONDS = 10 * 60
+WEBSOCKET_API_FALLBACK_DELAY_SECONDS = 30
 
 
 class ContextBuilder(Protocol):
@@ -47,6 +52,44 @@ class ContextBuilder(Protocol):
     ) -> str: ...
 
 
+async def _delayed_api_refresh_if_websocket_still_down(
+    *,
+    delay_seconds: int,
+    expected_runtime: HomelyRuntimeData,
+    runtime_data_getter: RuntimeDataGetter,
+    coordinator: DataUpdateCoordinator[dict[str, Any]],
+    logger: logging.Logger,
+    entry_id: str,
+    location_id: str | int,
+    ctx: ContextBuilder,
+    reason: str,
+) -> None:
+    """Request an API refresh only if websocket recovery did not happen first."""
+    await asyncio.sleep(delay_seconds)
+
+    runtime_data = runtime_data_getter()
+    if runtime_data is not expected_runtime:
+        return
+    if websocket_is_connected(runtime_data):
+        logger.debug(
+            "Skipping API fallback because websocket reconnected %s reason=%s",
+            ctx(entry_id, location_id),
+            reason,
+        )
+        return
+
+    runtime_data.force_api_refresh_once = True
+    try:
+        await coordinator.async_request_refresh()
+    except Exception as err:
+        logger.debug(
+            "Delayed API fallback refresh failed %s reason=%s: %s",
+            ctx(entry_id, location_id),
+            reason,
+            err,
+        )
+
+
 def build_device_topology_change_handler(
     *,
     hass: HomeAssistant,
@@ -56,26 +99,41 @@ def build_device_topology_change_handler(
     runtime_data_getter: RuntimeDataGetter,
     ctx: ContextBuilder,
     log_identifier: IdentifierFormatter,
+    save_snapshot: SnapshotSaver,
 ) -> Callable[[dict[str, Any]], None]:
     """Build a handler that reloads the entry when device topology changes."""
 
     async def _reload_for_device_topology_change(
         pending_runtime: HomelyRuntimeData,
+        previous_ids: set[str],
+        updated_data: dict[str, Any],
     ) -> None:
         """Reload the entry once when the device list changes."""
         current_runtime = runtime_data_getter()
         if current_runtime is not pending_runtime:
             return
 
+        reload_succeeded = False
         try:
+            await save_snapshot(updated_data)
             logger.info(
                 "Reloading Homely entry after device topology change %s",
                 ctx(entry.entry_id, location_id),
             )
-            await hass.config_entries.async_reload(entry.entry_id)
+            reload_succeeded = bool(
+                await hass.config_entries.async_reload(entry.entry_id)
+            )
+        except Exception as err:
+            logger.warning(
+                "Failed to reload Homely entry after device topology change %s: %s",
+                ctx(entry.entry_id, location_id),
+                err,
+            )
         finally:
             current_runtime = runtime_data_getter()
             if current_runtime is pending_runtime:
+                if not reload_succeeded:
+                    current_runtime.tracked_device_ids = previous_ids
                 current_runtime.topology_reload_pending = False
 
     def _handle_device_topology_change(updated_data: dict[str, Any]) -> None:
@@ -86,10 +144,10 @@ def build_device_topology_change_handler(
 
         updated_ids = device_id_snapshot(updated_data)
         previous_ids = runtime_data.tracked_device_ids
-        if not previous_ids:
-            runtime_data.tracked_device_ids = updated_ids
-            return
-
+        # An empty previous snapshot means setup ran without any devices (e.g.
+        # websocket-only fallback with no cached data), so the platforms were
+        # set up empty. The first poll that brings devices must still trigger
+        # a reload, otherwise device entities are never created.
         if updated_ids == previous_ids:
             return
 
@@ -97,16 +155,6 @@ def build_device_topology_change_handler(
         removed = sorted(previous_ids - updated_ids)
         runtime_data.tracked_device_ids = updated_ids
 
-        if runtime_data.topology_reload_pending:
-            logger.debug(
-                "Device topology changed again while reload is pending %s added_count=%s removed_count=%s",
-                ctx(entry.entry_id, location_id),
-                len(added),
-                len(removed),
-            )
-            return
-
-        runtime_data.topology_reload_pending = True
         logger.info(
             "Homely device topology changed %s added_count=%s removed_count=%s",
             ctx(entry.entry_id, location_id),
@@ -120,7 +168,32 @@ def build_device_topology_change_handler(
                 [log_identifier(device_id) for device_id in added],
                 [log_identifier(device_id) for device_id in removed],
             )
-        hass.async_create_task(_reload_for_device_topology_change(runtime_data))
+
+        if not added:
+            logger.info(
+                "Keeping stale Home Assistant device entries for manual removal %s removed_count=%s",
+                ctx(entry.entry_id, location_id),
+                len(removed),
+            )
+            return
+
+        if runtime_data.topology_reload_pending:
+            logger.debug(
+                "Device topology changed again while reload is pending %s added_count=%s removed_count=%s",
+                ctx(entry.entry_id, location_id),
+                len(added),
+                len(removed),
+            )
+            return
+
+        runtime_data.topology_reload_pending = True
+        hass.async_create_task(
+            _reload_for_device_topology_change(
+                runtime_data,
+                previous_ids,
+                updated_data,
+            )
+        )
 
     return _handle_device_topology_change
 
@@ -199,6 +272,23 @@ def build_websocket_data_handler(
                 return
 
             if event_type == "alarm-state-changed":
+                event_details: dict[str, Any] = {
+                    "alarm_state": result.get("alarm_state")
+                }
+                last_armed = result.get("last_armed")
+                if isinstance(last_armed, dict):
+                    record_last_armed(runtime_data, last_armed)
+                    event_details["last_armed_by"] = last_armed.get("user_name")
+                    event_details["last_armed_user_id"] = last_armed.get("user_id")
+                last_disarmed = result.get("last_disarmed")
+                if isinstance(last_disarmed, dict):
+                    record_last_disarmed(runtime_data, last_disarmed)
+                    event_details["last_disarmed_by"] = last_disarmed.get(
+                        "user_name"
+                    )
+                    event_details["last_disarmed_user_id"] = last_disarmed.get(
+                        "user_id"
+                    )
                 logger.debug(
                     "Applied websocket alarm update %s alarm_state=%s",
                     ctx(entry.entry_id, location_id),
@@ -209,7 +299,7 @@ def build_websocket_data_handler(
                         runtime_data,
                         event_type,
                         update_data_activity=True,
-                        event_details={"alarm_state": result.get("alarm_state")},
+                        event_details=event_details,
                     )
                     coordinator.async_update_listeners()
                 else:
@@ -267,6 +357,13 @@ def build_websocket_data_handler(
                             str(device_id) if device_id is not None else None,
                         ),
                     )
+                    if not runtime_data.last_data and not runtime_data.force_api_refresh_once:
+                        runtime_data.force_api_refresh_once = True
+                        hass.async_create_task(coordinator.async_request_refresh())
+                        logger.debug(
+                            "Requested immediate API refresh to build initial state %s",
+                            ctx(entry.entry_id, location_id),
+                        )
                     coordinator.async_update_listeners()
                 return
 
@@ -337,6 +434,7 @@ async def async_init_websocket(
         def _status_callback(status: str, reason: str | None) -> None:
             """Propagate websocket status changes back to runtime listeners."""
 
+            @callback
             def _dispatch_status_update() -> None:
                 runtime = runtime_data_getter()
                 current_ws = _current_websocket()
@@ -391,7 +489,6 @@ async def async_init_websocket(
                     status == "Disconnected"
                     and previous_status != "Disconnected"
                     and enable_websocket
-                    and not poll_when_websocket
                     and reason != "manual disconnect"
                 ):
                     try:
@@ -404,11 +501,25 @@ async def async_init_websocket(
                             )
                             return
                         runtime.ws_disconnect_refresh_monotonic = now_monotonic
-                        hass.async_create_task(coordinator.async_request_refresh())
+                        entry.async_create_background_task(
+                            hass,
+                            _delayed_api_refresh_if_websocket_still_down(
+                                delay_seconds=WEBSOCKET_API_FALLBACK_DELAY_SECONDS,
+                                expected_runtime=runtime,
+                                runtime_data_getter=runtime_data_getter,
+                                coordinator=coordinator,
+                                logger=logger,
+                                entry_id=entry.entry_id,
+                                location_id=location_id,
+                                ctx=ctx,
+                                reason="websocket disconnect",
+                            ),
+                            "homely websocket disconnect API fallback",
+                        )
                         logger.debug(
-                            "Requested immediate polling refresh after websocket disconnect "
-                            "%s",
+                            "Scheduled delayed polling refresh after websocket disconnect %s delay_s=%s",
                             ctx(entry.entry_id, location_id),
+                            WEBSOCKET_API_FALLBACK_DELAY_SECONDS,
                         )
                     except Exception as err:
                         logger.debug(
@@ -434,6 +545,7 @@ async def async_init_websocket(
             token=runtime_data.access_token,
             on_data_update=on_websocket_data,
             status_update_callback=_status_callback,
+            partner_code=runtime_data.partner_code,
         )
         websocket_holder["websocket"] = ws
 
@@ -484,6 +596,7 @@ def register_internet_available_listener(
 ) -> Any | None:
     """Register an internet recovery hook that nudges websocket reconnects."""
 
+    @callback
     def _internet_available(event: Any) -> None:
         try:
             runtime_data = runtime_data_getter()
@@ -558,6 +671,7 @@ def register_websocket_health_watchdog(
                 err,
             )
 
+    @callback
     def _watchdog(_: Any) -> None:
         """Request reconnects quickly when transport health dies silently."""
         runtime_data = runtime_data_getter()
@@ -602,6 +716,21 @@ def register_websocket_health_watchdog(
             runtime_data,
             reason,
             at=now_monotonic,
+        )
+        entry.async_create_background_task(
+            hass,
+            _delayed_api_refresh_if_websocket_still_down(
+                delay_seconds=WEBSOCKET_API_FALLBACK_DELAY_SECONDS,
+                expected_runtime=runtime_data,
+                runtime_data_getter=runtime_data_getter,
+                coordinator=coordinator,
+                logger=logger,
+                entry_id=entry.entry_id,
+                location_id=location_id,
+                ctx=ctx,
+                reason="websocket watchdog",
+            ),
+            "homely websocket watchdog API fallback",
         )
         _notify_runtime_watchers(runtime_data)
 
@@ -668,6 +797,7 @@ def register_websocket_connected_poll_fallback(
                 err,
             )
 
+    @callback
     def _periodic_refresh(_: Any) -> None:
         """Request a forced refresh when websocket-backed polling is suppressed."""
         runtime_data = runtime_data_getter()

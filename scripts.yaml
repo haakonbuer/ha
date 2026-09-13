@@ -161,7 +161,13 @@ skru_av_forste_etg:
     metadata: {}
     data: {}
     target:
-      floor_id: 1_etasje
+      area_id:
+      - entrance
+      - kitchen
+      - trapp
+      - living_room
+      - wc_rom
+      entity_id: switch.stikk_ved_sofa
 skru_av_andre_etg:
   mode: single
   alias: Skru av lys i 2. etg

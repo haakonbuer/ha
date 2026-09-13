@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from homeassistant.components.binary_sensor import (
@@ -21,15 +22,34 @@ from .entity_ids import battery_problem_unique_id
 DIAGNOSTIC_ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
 
 
-def _is_true(value: Any) -> bool:
-    """Return True for common true-like API values."""
+def _as_bool(value: Any) -> bool | None:
+    """Return a parsed API boolean, or None when the value is unknown."""
     if isinstance(value, bool):
         return value
     if isinstance(value, (int, float)):
-        return value == 1
+        if value == 1:
+            return True
+        if value == 0:
+            return False
+        return None
     if isinstance(value, str):
-        return value.strip().lower() in {"true", "1", "yes", "on"}
-    return False
+        normalized = value.strip().lower()
+        if normalized in {"true", "1", "yes", "on"}:
+            return True
+        if normalized in {"false", "0", "no", "off"}:
+            return False
+    return None
+
+
+def _is_true(value: Any) -> bool:
+    """Return True for common true-like API values."""
+    return _as_bool(value) is True
+
+
+def _state_value(states: dict[str, Any], state_name: str) -> Any:
+    """Return a nested state value without trusting payload shape."""
+    state = states.get(state_name)
+    return state.get("value") if isinstance(state, dict) else None
 
 
 class HomelyAllBatteriesHealthySensor(CoordinatorEntity, BinarySensorEntity):
@@ -40,8 +60,10 @@ class HomelyAllBatteriesHealthySensor(CoordinatorEntity, BinarySensorEntity):
         coordinator: DataUpdateCoordinator[dict[str, Any]],
         location_name: str,
         location_id: str | int,
+        fallback_data_getter: Callable[[], dict[str, Any] | None] | None = None,
     ) -> None:
         super().__init__(coordinator)
+        self._fallback_data_getter = fallback_data_getter
         self._attr_has_entity_name = True
         self._attr_translation_key = "any_battery_problem"
         self._attr_unique_id = battery_problem_unique_id(location_id)
@@ -58,17 +80,23 @@ class HomelyAllBatteriesHealthySensor(CoordinatorEntity, BinarySensorEntity):
 
     @property
     def available(self) -> bool:
-        """Return False when coordinator has no data."""
-        return super().available and isinstance(self.coordinator.data, dict)
+        """Return whether there is a location snapshot to aggregate."""
+        data = self._location_data()
+        return (
+            super().available
+            and isinstance(data, dict)
+            and isinstance(data.get("devices"), list)
+        )
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         """Return True when any device reports battery issue."""
-        data = self.coordinator.data or {}
+        data = self._location_data() or {}
         devices = data.get("devices", [])
         if not isinstance(devices, list):
-            return False
+            return None
 
+        has_known_battery_state = False
         for device in devices:
             if not isinstance(device, dict):
                 continue
@@ -85,8 +113,8 @@ class HomelyAllBatteriesHealthySensor(CoordinatorEntity, BinarySensorEntity):
             if not isinstance(battery, dict):
                 battery = {}
 
-            battery_defect = battery.get("defect", {}).get("value")
-            battery_low = battery.get("low", {}).get("value")
+            battery_defect = _state_value(battery, "defect")
+            battery_low = _state_value(battery, "low")
             # Some lock devices (e.g. Yale Doorman) report battery state under report.lowbat.
             report_feature = features.get("report", {})
             if isinstance(report_feature, dict):
@@ -95,11 +123,24 @@ class HomelyAllBatteriesHealthySensor(CoordinatorEntity, BinarySensorEntity):
                 report_states = {}
             if not isinstance(report_states, dict):
                 report_states = {}
-            report_low_battery = report_states.get("lowbat", {}).get("value")
-            if (
-                _is_true(battery_defect)
-                or _is_true(battery_low)
-                or _is_true(report_low_battery)
-            ):
+            report_low_battery = _state_value(report_states, "lowbat")
+            parsed_values = (
+                _as_bool(battery_defect),
+                _as_bool(battery_low),
+                _as_bool(report_low_battery),
+            )
+            if any(value is True for value in parsed_values):
                 return True
-        return False
+            if any(value is not None for value in parsed_values):
+                has_known_battery_state = True
+        return False if has_known_battery_state else None
+
+    def _location_data(self) -> dict[str, Any] | None:
+        """Return current data, falling back to the last stored snapshot."""
+        data: Any = self.coordinator.data
+        if isinstance(data, dict):
+            return data
+        if self._fallback_data_getter is None:
+            return None
+        fallback_data = self._fallback_data_getter()
+        return fallback_data if isinstance(fallback_data, dict) else None

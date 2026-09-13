@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntity
@@ -18,7 +19,8 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .const import DOMAIN
-from .models import HomelyConfigEntry, get_entry_runtime_data
+from .models import HomelyConfigEntry, HomelyRuntimeData, get_entry_runtime_data
+from .runtime_state import LAST_ARMED_CACHE_KEY, LAST_DISARMED_CACHE_KEY
 
 _LOGGER = logging.getLogger(__name__)
 PARALLEL_UPDATES = 0
@@ -52,7 +54,20 @@ async def async_setup_entry(
     runtime_data = get_entry_runtime_data(entry)
     coordinator = runtime_data.coordinator
     location_id = runtime_data.location_id
-    async_add_entities([HomelyAlarmPanel(coordinator, location_id)])
+
+    def _fallback_data_getter() -> dict[str, Any] | None:
+        return runtime_data.last_data
+
+    async_add_entities(
+        [
+            HomelyAlarmPanel(
+                coordinator,
+                location_id,
+                runtime_data=runtime_data,
+                fallback_data_getter=_fallback_data_getter,
+            )
+        ]
+    )
 
 
 class HomelyAlarmPanel(CoordinatorEntity, AlarmControlPanelEntity):
@@ -62,11 +77,16 @@ class HomelyAlarmPanel(CoordinatorEntity, AlarmControlPanelEntity):
         self,
         coordinator: DataUpdateCoordinator[dict[str, Any]],
         location_id: str,
+        runtime_data: HomelyRuntimeData | None = None,
+        fallback_data_getter: Callable[[], dict[str, Any] | None] | None = None,
     ) -> None:
         super().__init__(coordinator)
+        self._runtime_data = runtime_data
+        self._fallback_data_getter = fallback_data_getter
         self._attr_has_entity_name = True
         self._location_id = location_id
         self._last_unknown_state: str | None = None
+        self._attr_code_arm_required = False
         location_name = str(
             (coordinator.data or {}).get("name") or f"Homely location {location_id}"
         )
@@ -83,7 +103,7 @@ class HomelyAlarmPanel(CoordinatorEntity, AlarmControlPanelEntity):
     @property
     def alarm_state(self) -> AlarmControlPanelState | None:
         """Return the mapped alarm state."""
-        data = self.coordinator.data or {}
+        data = self._location_data()
 
         # Top-level alarmState is present in polling responses and updated by websocket helpers.
         api_state = data.get("alarmState")
@@ -117,3 +137,74 @@ class HomelyAlarmPanel(CoordinatorEntity, AlarmControlPanelEntity):
                     api_state_str,
                 )
         return None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Return metadata for the last known arm and disarm events."""
+        attrs = self._last_armed_attrs()
+        attrs.update(self._last_disarmed_attrs())
+        return attrs or None
+
+    def _location_data(self) -> dict[str, Any]:
+        """Return current location data, with cached data as fallback."""
+        data: Any = self.coordinator.data
+        if not data and self._fallback_data_getter is not None:
+            data = self._fallback_data_getter()
+        return data if isinstance(data, dict) else {}
+
+    def _last_disarmed_attrs(self) -> dict[str, Any]:
+        """Return alarm-panel attributes for the last DISARMED event."""
+        runtime_data = self._runtime_data
+        if runtime_data is not None:
+            attrs: dict[str, Any] = {}
+            if runtime_data.last_disarmed_by:
+                attrs["last_disarmed_by"] = runtime_data.last_disarmed_by
+            if runtime_data.last_disarmed_user_id:
+                attrs["last_disarmed_user_id"] = runtime_data.last_disarmed_user_id
+            if runtime_data.last_disarmed_at:
+                attrs["last_disarmed_at"] = runtime_data.last_disarmed_at
+            if runtime_data.last_disarmed_device_id:
+                attrs["last_disarmed_device_id"] = runtime_data.last_disarmed_device_id
+            return attrs
+
+        return self._cached_alarm_event_attrs(LAST_DISARMED_CACHE_KEY, "disarmed")
+
+    def _last_armed_attrs(self) -> dict[str, Any]:
+        """Return alarm-panel attributes for the last completed armed event."""
+        runtime_data = self._runtime_data
+        if runtime_data is not None:
+            attrs: dict[str, Any] = {}
+            if runtime_data.last_armed_by:
+                attrs["last_armed_by"] = runtime_data.last_armed_by
+            if runtime_data.last_armed_user_id:
+                attrs["last_armed_user_id"] = runtime_data.last_armed_user_id
+            if runtime_data.last_armed_at:
+                attrs["last_armed_at"] = runtime_data.last_armed_at
+            if runtime_data.last_armed_device_id:
+                attrs["last_armed_device_id"] = runtime_data.last_armed_device_id
+            return attrs
+
+        return self._cached_alarm_event_attrs(LAST_ARMED_CACHE_KEY, "armed")
+
+    def _cached_alarm_event_attrs(
+        self, cache_key: str, attribute_prefix: str
+    ) -> dict[str, Any]:
+        """Return normalized alarm-event attributes from cached location data."""
+        details = self._location_data().get(cache_key)
+        if not isinstance(details, dict):
+            return {}
+
+        attrs: dict[str, Any] = {}
+        user_name = details.get("user_name") or details.get("userName")
+        user_id = details.get("user_id") or details.get("userId")
+        changed_at = details.get("timestamp") or details.get("time")
+        device_id = details.get("device_id") or details.get("deviceId")
+        if user_name:
+            attrs[f"last_{attribute_prefix}_by"] = user_name
+        if user_id:
+            attrs[f"last_{attribute_prefix}_user_id"] = user_id
+        if changed_at:
+            attrs[f"last_{attribute_prefix}_at"] = changed_at
+        if device_id:
+            attrs[f"last_{attribute_prefix}_device_id"] = device_id
+        return attrs

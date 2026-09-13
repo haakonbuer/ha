@@ -15,6 +15,8 @@ from .websocket import (
 )
 
 WEBSOCKET_WATCHDOG_RECOVERY_WINDOW_SECONDS = 30 * 60
+LAST_ARMED_CACHE_KEY = "lastArmedBy"
+LAST_DISARMED_CACHE_KEY = "lastDisarmedBy"
 
 
 @dataclass(frozen=True)
@@ -219,11 +221,6 @@ def update_runtime_websocket_state(runtime_data: HomelyRuntimeData) -> None:
         runtime_data.last_disconnect_reason = snapshot.reason
 
 
-def cached_data_grace_seconds(scan_interval: int) -> int:
-    """Return grace period for cached polling data when websocket is unavailable."""
-    return max(60, min(scan_interval, 300))
-
-
 def tracked_api_device_ids(
     entry_data: HomelyRuntimeData | None,
 ) -> tuple[bool, set[str]]:
@@ -261,11 +258,58 @@ def device_id_snapshot(data: dict[str, Any] | None) -> set[str]:
     }
 
 
+def location_payload_error(
+    data: dict[str, Any] | None,
+    expected_location_id: str | int,
+) -> str | None:
+    """Return why a REST location payload is unsafe to accept."""
+    if not isinstance(data, dict) or not data:
+        return "payload is empty or not an object"
+
+    payload_location_id = data.get("locationId")
+    if payload_location_id is None:
+        return "payload is missing locationId"
+    if str(payload_location_id) != str(expected_location_id):
+        return "payload locationId does not match the configured location"
+
+    devices = data.get("devices")
+    if not isinstance(devices, list):
+        return "payload devices is missing or not a list"
+
+    seen_ids: set[str] = set()
+    for device in devices:
+        if not isinstance(device, dict):
+            return "payload contains a device that is not an object"
+        device_id = device.get("id")
+        if device_id is None or not str(device_id).strip():
+            return "payload contains a device without an id"
+        normalized_id = str(device_id)
+        if normalized_id in seen_ids:
+            return "payload contains duplicate device ids"
+        seen_ids.add(normalized_id)
+
+    return None
+
+
 def monotonic_age_seconds(last_monotonic: float | None) -> int | None:
     """Return age in seconds for a monotonic timestamp."""
     if last_monotonic is None or last_monotonic <= 0:
         return None
     return max(0, int(monotonic() - last_monotonic))
+
+
+def record_api_poll_status(
+    runtime_data: HomelyRuntimeData,
+    status: str,
+    *,
+    status_code: int | None = None,
+    detail: str | None = None,
+) -> None:
+    """Record the status of the latest attempted REST API poll."""
+    runtime_data.last_api_poll_status = status
+    runtime_data.last_api_poll_status_code = status_code
+    runtime_data.last_api_poll_detail = detail
+    runtime_data.last_api_poll_at = dt_util.utcnow()
 
 
 def record_successful_poll(runtime_data: HomelyRuntimeData, at: float | None = None) -> None:
@@ -274,6 +318,7 @@ def record_successful_poll(runtime_data: HomelyRuntimeData, at: float | None = N
     runtime_data.last_successful_poll_monotonic = timestamp
     runtime_data.last_data_activity_monotonic = timestamp
     runtime_data.last_successful_poll_at = dt_util.utcnow()
+    record_api_poll_status(runtime_data, "success", status_code=200)
 
 
 def record_websocket_event(
@@ -292,6 +337,51 @@ def record_websocket_event(
     runtime_data.last_ws_event_details = event_details
     if update_data_activity:
         runtime_data.last_data_activity_monotonic = timestamp
+
+
+def _alarm_event_detail(details: dict[str, Any], snake_key: str, camel_key: str) -> Any:
+    """Return an alarm-event detail from normalized or API-style keys."""
+    value = details.get(snake_key)
+    return details.get(camel_key) if value is None else value
+
+
+def record_last_armed(
+    runtime_data: HomelyRuntimeData,
+    details: dict[str, Any] | None,
+) -> None:
+    """Record details for the last completed armed alarm event."""
+    if not isinstance(details, dict):
+        return
+
+    user_name = _alarm_event_detail(details, "user_name", "userName")
+    runtime_data.last_armed_by = str(user_name) if user_name else None
+    user_id = _alarm_event_detail(details, "user_id", "userId")
+    runtime_data.last_armed_user_id = str(user_id) if user_id else None
+    armed_at = _alarm_event_detail(details, "timestamp", "time")
+    runtime_data.last_armed_at = str(armed_at) if armed_at else None
+    device_id = _alarm_event_detail(details, "device_id", "deviceId")
+    runtime_data.last_armed_device_id = str(device_id) if device_id else None
+
+
+def record_last_disarmed(
+    runtime_data: HomelyRuntimeData,
+    details: dict[str, Any] | None,
+) -> None:
+    """Record details for the last DISARMED alarm event."""
+    if not isinstance(details, dict):
+        return
+
+    user_name = _alarm_event_detail(details, "user_name", "userName")
+    runtime_data.last_disarmed_by = str(user_name) if user_name else None
+
+    user_id = _alarm_event_detail(details, "user_id", "userId")
+    runtime_data.last_disarmed_user_id = str(user_id) if user_id else None
+
+    disarmed_at = _alarm_event_detail(details, "timestamp", "time")
+    runtime_data.last_disarmed_at = str(disarmed_at) if disarmed_at else None
+
+    device_id = _alarm_event_detail(details, "device_id", "deviceId")
+    runtime_data.last_disarmed_device_id = str(device_id) if device_id else None
 
 
 def _prune_watchdog_recovery_history(
@@ -359,6 +449,12 @@ def runtime_observability_snapshot(runtime_data: HomelyRuntimeData) -> dict[str,
     websocket_state = websocket_connection_state(runtime_data)
     return {
         "api_available": runtime_data.api_available,
+        "last_api_poll_status": runtime_data.last_api_poll_status,
+        "last_api_poll_status_code": runtime_data.last_api_poll_status_code,
+        "last_api_poll_detail": runtime_data.last_api_poll_detail,
+        "next_api_retry_at": runtime_data.next_api_retry_at,
+        "next_api_retry_status_code": runtime_data.next_api_retry_status_code,
+        "next_api_retry_delay_seconds": runtime_data.next_api_retry_delay_seconds,
         "ws_status": runtime_data.ws_status,
         "ws_status_reason": runtime_data.ws_status_reason,
         "last_disconnect_reason": runtime_data.last_disconnect_reason,

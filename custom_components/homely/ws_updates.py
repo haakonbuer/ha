@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .runtime_state import LAST_ARMED_CACHE_KEY, LAST_DISARMED_CACHE_KEY
+
 
 def _normalize_event_type(event_type: Any) -> str | None:
     """Normalize websocket event type names to kebab-case."""
@@ -32,6 +34,38 @@ def ensure_alarm_root(data_dict: dict[str, Any]) -> dict[str, Any]:
     return _ensure_nested_dict(states, "alarm")
 
 
+def _event_type_and_payload(event_data: dict[str, Any]) -> tuple[str | None, dict[str, Any]]:
+    """Return normalized event type and payload from known websocket shapes."""
+    raw_event_type = event_data.get("type") or event_data.get("event")
+    payload = event_data.get("data")
+    if not isinstance(payload, dict):
+        payload = event_data.get("payload")
+
+    args = event_data.get("args")
+    if isinstance(args, list):
+        for item in args:
+            if not isinstance(item, dict):
+                continue
+            arg_type = item.get("type") or item.get("event")
+            arg_payload = item.get("data")
+            if isinstance(arg_payload, dict):
+                raw_event_type = arg_type or raw_event_type
+                payload = arg_payload
+                break
+
+    return _normalize_event_type(raw_event_type), payload if isinstance(payload, dict) else {}
+
+
+def _alarm_change_details(payload: dict[str, Any]) -> dict[str, Any]:
+    """Build stable metadata for an alarm state-change event."""
+    return {
+        "user_name": payload.get("userName"),
+        "user_id": payload.get("userId"),
+        "timestamp": payload.get("timestamp"),
+        "device_id": payload.get("deviceId"),
+    }
+
+
 def apply_device_state_changes(
     data_dict: dict[str, Any],
     event_payload: dict[str, Any],
@@ -47,7 +81,14 @@ def apply_device_state_changes(
     devices = data_dict.get("devices", [])
     if not isinstance(devices, list):
         return []
-    device = next((d for d in devices if d.get("id") == device_id), None)
+    device = next(
+        (
+            item
+            for item in devices
+            if isinstance(item, dict) and item.get("id") == device_id
+        ),
+        None,
+    )
     if not isinstance(device, dict):
         return []
 
@@ -97,13 +138,7 @@ def apply_websocket_event_to_data(
     event_data: dict[str, Any],
 ) -> dict[str, Any]:
     """Apply a websocket event to cached data and return update details."""
-    raw_event_type = event_data.get("type") or event_data.get("event")
-    event_type = _normalize_event_type(raw_event_type)
-    payload = event_data.get("data")
-    if not isinstance(payload, dict):
-        payload = event_data.get("payload")
-    if not isinstance(payload, dict):
-        payload = {}
+    event_type, payload = _event_type_and_payload(event_data)
 
     result: dict[str, Any] = {
         "event_type": event_type,
@@ -120,6 +155,23 @@ def apply_websocket_event_to_data(
             alarm_state_dict = ensure_alarm_root(data_dict)
             alarm_state_dict["value"] = alarm_state
             data_dict["alarmState"] = alarm_state
+            normalized_state = str(alarm_state).upper()
+            if normalized_state == "DISARMED":
+                last_disarmed = _alarm_change_details(payload)
+                if any(value is not None for value in last_disarmed.values()):
+                    data_dict[LAST_DISARMED_CACHE_KEY] = last_disarmed
+                    result["last_disarmed"] = last_disarmed
+            elif (
+                normalized_state == "ARMED"
+                or (
+                    normalized_state.startswith("ARMED_")
+                    and not normalized_state.endswith("_PENDING")
+                )
+            ):
+                last_armed = _alarm_change_details(payload)
+                if any(value is not None for value in last_armed.values()):
+                    data_dict[LAST_ARMED_CACHE_KEY] = last_armed
+                    result["last_armed"] = last_armed
         result["updated"] = alarm_state is not None
         result["alarm_state"] = alarm_state
         return result

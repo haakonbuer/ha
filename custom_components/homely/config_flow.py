@@ -16,18 +16,11 @@ from homely.client import HomelyClient
 
 from .const import (
     CONF_PENDING_IMPORT_LOCATIONS,
-    CONF_ENABLE_DEBUG_SENSORS,
-    CONF_ENABLE_WEBSOCKET,
     CONF_HOME_ID,
     CONF_LOCATION_ID,
     CONF_PASSWORD,
-    CONF_POLL_WHEN_WEBSOCKET,
-    CONF_SCAN_INTERVAL,
     CONF_USERNAME,
-    DEFAULT_ENABLE_DEBUG_SENSORS,
-    DEFAULT_ENABLE_WEBSOCKET,
     DEFAULT_HOME_ID,
-    DEFAULT_POLL_WHEN_WEBSOCKET,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
@@ -131,11 +124,7 @@ def _find_location_by_id(
 
 def _entry_options() -> dict[str, Any]:
     """Return default options for newly created entries."""
-    return {
-        CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL,
-        CONF_ENABLE_WEBSOCKET: DEFAULT_ENABLE_WEBSOCKET,
-        CONF_POLL_WHEN_WEBSOCKET: DEFAULT_POLL_WHEN_WEBSOCKET,
-    }
+    return {}
 
 
 def _coerce_scan_interval(value: Any, default: int = DEFAULT_SCAN_INTERVAL) -> int:
@@ -166,15 +155,6 @@ async def get_location_id(
 ) -> list[dict[str, Any]] | None:
     """Fetch account locations through the SDK client."""
     return await _get_client(hass).get_locations(token)
-
-
-async def get_data(
-    hass: HomeAssistant,
-    token: str,
-    location_id: str | int,
-) -> dict[str, Any] | None:
-    """Fetch location data through the SDK client."""
-    return await _get_client(hass).get_home_data(token, location_id)
 
 
 async def _fetch_locations_for_credentials(
@@ -229,13 +209,6 @@ class HomelyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _pending_password: str | None = None
     _pending_locations: list[dict[str, Any]] | None = None
     _reauth_entry: config_entries.ConfigEntry | None = None
-
-    @staticmethod
-    def async_get_options_flow(
-        config_entry: config_entries.ConfigEntry,
-    ) -> HomelyOptionsFlow:
-        """Get the options flow for this handler."""
-        return HomelyOptionsFlow()
 
     @staticmethod
     def _build_user_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
@@ -575,135 +548,4 @@ class HomelyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=errors,
-        )
-
-class HomelyOptionsFlow(config_entries.OptionsFlow):
-    """Handle options flow for Homely Alarm."""
-
-    @staticmethod
-    def _build_options_schema(
-        scan_interval: int,
-        enable_websocket: bool,
-        poll_when_websocket: bool,
-        enable_debug_sensors: bool,
-    ) -> vol.Schema:
-        """Build options schema with supplied defaults."""
-        from homeassistant.helpers import selector
-
-        return vol.Schema(
-            {
-                vol.Optional(
-                    CONF_SCAN_INTERVAL,
-                    default=scan_interval,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        mode=selector.NumberSelectorMode.BOX,
-                        min=30,
-                        unit_of_measurement="seconds",
-                    )
-                ),
-                vol.Optional(
-                    CONF_ENABLE_WEBSOCKET,
-                    default=enable_websocket,
-                ): selector.BooleanSelector(),
-                vol.Optional(
-                    CONF_POLL_WHEN_WEBSOCKET,
-                    default=poll_when_websocket,
-                ): selector.BooleanSelector(),
-                vol.Optional(
-                    CONF_ENABLE_DEBUG_SENSORS,
-                    default=enable_debug_sensors,
-                ): selector.BooleanSelector(),
-            }
-        )
-
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        """Manage advanced runtime options."""
-        scan_interval = _coerce_scan_interval(
-            self.config_entry.options.get(
-                CONF_SCAN_INTERVAL,
-                self.config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
-            )
-        )
-        enable_websocket = bool(
-            self.config_entry.options.get(
-                CONF_ENABLE_WEBSOCKET,
-                self.config_entry.data.get(
-                    CONF_ENABLE_WEBSOCKET, DEFAULT_ENABLE_WEBSOCKET
-                ),
-            )
-        )
-        poll_when_websocket = bool(
-            self.config_entry.options.get(
-                CONF_POLL_WHEN_WEBSOCKET,
-                self.config_entry.data.get(
-                    CONF_POLL_WHEN_WEBSOCKET,
-                    DEFAULT_POLL_WHEN_WEBSOCKET,
-                ),
-            )
-        )
-        enable_debug_sensors = bool(
-            self.config_entry.options.get(
-                CONF_ENABLE_DEBUG_SENSORS,
-                self.config_entry.data.get(
-                    CONF_ENABLE_DEBUG_SENSORS,
-                    DEFAULT_ENABLE_DEBUG_SENSORS,
-                ),
-            )
-        )
-
-        if user_input is not None:
-            errors: dict[str, str] = {}
-
-            raw_scan_interval = user_input.get(CONF_SCAN_INTERVAL, scan_interval)
-            try:
-                scan_interval = int(raw_scan_interval)
-                if scan_interval < 30:
-                    raise ValueError
-            except (TypeError, ValueError):
-                errors[CONF_SCAN_INTERVAL] = "invalid_scan_interval"
-                scan_interval = _coerce_scan_interval(raw_scan_interval, scan_interval)
-
-            enable_websocket = bool(
-                user_input.get(CONF_ENABLE_WEBSOCKET, enable_websocket)
-            )
-            poll_when_websocket = bool(
-                user_input.get(CONF_POLL_WHEN_WEBSOCKET, poll_when_websocket)
-            )
-            enable_debug_sensors = bool(
-                user_input.get(CONF_ENABLE_DEBUG_SENSORS, enable_debug_sensors)
-            )
-
-            if errors:
-                return self.async_show_form(
-                    step_id="init",
-                    data_schema=self._build_options_schema(
-                        scan_interval,
-                        enable_websocket,
-                        poll_when_websocket,
-                        enable_debug_sensors,
-                    ),
-                    errors=errors,
-                )
-
-            return self.async_create_entry(
-                title="",
-                data={
-                    CONF_SCAN_INTERVAL: scan_interval,
-                    CONF_ENABLE_WEBSOCKET: enable_websocket,
-                    CONF_POLL_WHEN_WEBSOCKET: poll_when_websocket,
-                    CONF_ENABLE_DEBUG_SENSORS: enable_debug_sensors,
-                },
-            )
-
-        return self.async_show_form(
-            step_id="init",
-            data_schema=self._build_options_schema(
-                scan_interval,
-                enable_websocket,
-                poll_when_websocket,
-                enable_debug_sensors,
-            ),
         )

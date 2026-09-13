@@ -29,23 +29,53 @@ class HomelyRuntimeData:
     ws_status_reason: str | None = None
     last_disconnect_reason: str | None = None
     ws_status_listeners: list[Callable[[], None]] = field(default_factory=list)
-    ws_disconnect_refresh_monotonic: float = 0.0
-    ws_watchdog_reconnect_monotonic: float = 0.0
-    ws_watchdog_last_warning_monotonic: float = 0.0
+    # "Last time X happened" debounce timestamps. Default to -inf (never), not
+    # 0.0: a `monotonic() - ts < threshold` debounce treats 0.0 as "happened at
+    # boot", which falsely fires when the machine's uptime is below the
+    # threshold (e.g. a fresh CI runner or an appliance starting HA right after
+    # boot), wrongly suppressing the first reconnect/refresh/warning.
+    ws_disconnect_refresh_monotonic: float = float("-inf")
+    ws_watchdog_reconnect_monotonic: float = float("-inf")
+    ws_watchdog_last_warning_monotonic: float = float("-inf")
     ws_watchdog_last_reason: str | None = None
     ws_watchdog_last_action_at: datetime | None = None
     ws_watchdog_recovery_history_monotonic: list[float] = field(default_factory=list)
-    last_successful_poll_monotonic: float = field(default_factory=monotonic)
+    # None until a poll actually succeeds; seeded setups must not fake one.
+    last_successful_poll_monotonic: float | None = None
     last_data_activity_monotonic: float = field(default_factory=monotonic)
     last_successful_poll_at: datetime | None = None
+    last_api_poll_status: str = "not_run"
+    last_api_poll_status_code: int | None = None
+    last_api_poll_detail: str | None = None
+    last_api_poll_at: datetime | None = None
+    next_api_retry_at: datetime | None = None
+    next_api_retry_status_code: int | None = None
+    next_api_retry_delay_seconds: int | None = None
+    api_retry_unsub: Callable[[], None] | None = None
     last_websocket_event_monotonic: float | None = None
     last_websocket_event_at: datetime | None = None
     last_websocket_event_type: str | None = None
     last_ws_event_details: dict[str, Any] | None = None
+    last_armed_by: str | None = None
+    last_armed_user_id: str | None = None
+    last_armed_at: str | None = None
+    last_armed_device_id: str | None = None
+    last_disarmed_by: str | None = None
+    last_disarmed_user_id: str | None = None
+    last_disarmed_at: str | None = None
+    last_disarmed_device_id: str | None = None
     api_available: bool = True
+    # Exponential backoff for REST polling while the websocket carries live
+    # data. Avoids hammering a rate-limited/broken API (HTTP 429/439) every
+    # scan interval. -inf means "no backoff active".
+    poll_backoff_until_monotonic: float = float("-inf")
+    poll_backoff_level: int = 0
     tracked_device_ids: set[str] = field(default_factory=set)
+    pending_removed_device_ids: set[str] = field(default_factory=set)
+    pending_removal_confirmations: int = 0
     topology_reload_pending: bool = False
     force_api_refresh_once: bool = False
+    partner_code: int | str | None = None
 
 
 type HomelyConfigEntry = ConfigEntry[HomelyRuntimeData]

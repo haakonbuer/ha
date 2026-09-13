@@ -5,10 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from homeassistant.components.binary_sensor import (
-    BinarySensorDeviceClass,
-    BinarySensorEntity,
-)
+from homeassistant.components.binary_sensor import BinarySensorDeviceClass, BinarySensorEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
@@ -89,6 +86,7 @@ async def async_setup_entry(
             coordinator,
             str(location_name),
             location_id,
+            fallback_data_getter=_last_data,
         )
     )
 
@@ -116,7 +114,7 @@ class HomelyDeviceOnlineSensor(CoordinatorEntity, BinarySensorEntity):
             self._attr_suggested_object_id = suggested_object_id
         self._attr_icon = "mdi:lan-connect"
         self._attr_entity_category = DIAGNOSTIC_ENTITY_CATEGORY
-        self._attr_entity_registry_enabled_default = False
+        self._attr_entity_registry_enabled_default = True
         self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self._device_id)},
@@ -140,13 +138,13 @@ class HomelyDeviceOnlineSensor(CoordinatorEntity, BinarySensorEntity):
         return super().available and self._get_current_device() is not None
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         """Return True if device is online."""
         device = self._get_current_device()
         if not device:
-            return False
+            return None
 
-        return bool(device.get("online", False))
+        return _coerce_bool(device.get("online"))
 
 
 class HomelyBinarySensor(CoordinatorEntity, BinarySensorEntity):
@@ -225,11 +223,11 @@ class HomelyBinarySensor(CoordinatorEntity, BinarySensorEntity):
         return super().available and is_device_available(self._get_current_device())
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         """Return True if sensor is on."""
         device = self._get_current_device()
         if not device:
-            return False
+            return None
 
         value = _get_value_by_path(device, self._path)
         if callable(self._transform_device_value):
@@ -244,5 +242,5 @@ class HomelyBinarySensor(CoordinatorEntity, BinarySensorEntity):
                 pass
         parsed = _coerce_bool(value)
         if parsed is None:
-            return False
+            return None
         return not parsed if self._invert else parsed
