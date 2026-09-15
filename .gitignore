@@ -3,8 +3,9 @@
 !*.md
 
 # Ignore folders
-.storage
-.cloud
+.storage/
+.cloud/
+.deps/
 .google.token
 
 .shopping_list.json
@@ -12,13 +13,35 @@
 home-assistant.log*
 home-assistant_v2.db*
 
+
+# Runtime-generated files
+.shopping_list.json
 ip_bans.yaml
-secrets.yaml
 known_devices.yaml
+tts/
+
+# Secrets..
+secrets.yaml
+**/secrets.yaml
+*.secret.yaml
+*.secrets.yaml
 
 
+# Shell / SSH / system files
 .bash_history
 .bash_profile
-
 host_keys
-.ssh
+.ssh/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+
