@@ -1,0 +1,67 @@
+
+  - name: "Bryter ved trapp VK1T"
+    state_address: "3/1/10"
+    reset_after: 5
+    sync_state: False
+      
+  - name: "Bryter ved trapp VKT2"
+    state_address: "3/1/23"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter ved trapp VKB1"
+    state_address: "3/1/11"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter ved trapp VKB2"
+    state_address: "3/1/12"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - VKT"
+    state_address: "3/1/13"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - VKT2"
+    state_address: "3/1/15"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - VKB"
+    state_address: "3/1/14"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - VKB2"
+    state_address: "3/1/16"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - HKT1"
+    state_address: "3/1/19"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - HKT2"
+    state_address: "3/1/20"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - HKB1"
+    state_address: "3/1/21"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Bryter Stue Kitchen - HKB2"
+    state_address: "3/1/22"
+    reset_after: 5
+    sync_state: False
+
+  - name: "Varmepådrag vaskerom elektrisk"
+    state_address: "2/0/31"
+
+  - name: "Varmepådrag master bad"
+    state_address: "2/2/17"
+

@@ -1,0 +1,65 @@
+
+
+# Klima i kjeller
+
+  - name: "Kjellergang"
+    temperature_address: "2/0/2"
+    target_temperature_address: "2/0/5"
+    target_temperature_state_address: "2/0/4"
+
+  - name: "Kjellerstue"
+    temperature_address: "2/0/13"
+    target_temperature_address: "2/0/16"
+    target_temperature_state_address: "2/0/15"
+
+  - name: "Vaskerom"
+    temperature_address: ["2/0/24", "2/0/25"]
+    target_temperature_address: "2/0/27"
+    target_temperature_state_address: "2/0/26"
+
+# Klima i 1. etg
+
+  - name: "Entre"
+    temperature_address: "2/1/2"
+    target_temperature_address: "2/1/5"
+    target_temperature_state_address: "2/1/4"
+    command_value_state_address: "2/0/0"
+
+  - name: "Stue"
+    temperature_address: "2/1/13"
+    target_temperature_address: "2/1/16"
+    target_temperature_state_address: "2/1/15"
+
+  - name: "Kjøkken"
+    temperature_address: "2/1/24"
+    target_temperature_address: "2/1/27"
+    target_temperature_state_address: "2/1/26"
+
+# Klima i 2. etg
+
+  - name: "Lekerom"
+    temperature_address: "2/2/2"
+    target_temperature_address: "2/2/5"
+    target_temperature_state_address: "2/2/4"
+
+  - name: "Bad"
+    temperature_address: "2/2/13"
+    target_temperature_address: "2/2/16"
+    target_temperature_state_address: "2/2/15"
+    on_off_address: "2/2/17"
+    on_off_state_address: "2/2/11"
+
+  - name: "Sov 1"
+    temperature_address: "2/2/24"
+    target_temperature_address: "2/2/27"
+    target_temperature_state_address: "2/2/26"
+
+  - name: "Sov 2"
+    temperature_address: "2/2/35"
+    target_temperature_address: "2/2/38"
+    target_temperature_state_address: "2/2/37"
+
+  - name: "Master sov"
+    temperature_address: "2/2/46"
+    target_temperature_address: "2/2/49"
+    target_temperature_state_address: "2/2/48"

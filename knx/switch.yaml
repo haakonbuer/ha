@@ -1,0 +1,80 @@
+
+# Config for relays
+  - name: "Tvangskjøring varme"
+    address: "0/0/200"
+
+  - name: "Tvangskjøring varme 2.etg"
+    address: "0/0/202"
+
+# Usikker på om denne fungerer, kan være at den må taes vekk...
+  - name: "Vaskerom termostat - ikke varmekabler"
+    address: "2/2/55"
+
+  - name: "Master sov bryter TA"
+    address: "1/2/141"
+
+  - name: "Bryter ved trapp TA"
+    address: "3/1/2"
+
+  - name: "Bryter stue TA"
+    address: "3/1/5"
+
+  - name: "Bryter stue kjøkken TA"
+    address: "3/1/6"
+
+  - name: "Bryter stue TV TA"
+    address: "3/1/8"
+
+  - name: "Master sov LED L2 Green"
+    address: "1/2/138"
+
+  - name: "Master sov LED L2 Blue"
+    address: "1/2/139"
+
+  - name: "Entre bryter knapp 3 - MASTER PÅ/AV"
+    address: "1/1/198"
+
+  - name: "Stikk ved sofa"
+    address: "0/1/0"
+    state_address: "0/1/1"
+
+  - name: "Stikk ved daybed"
+    address: "0/1/2"
+    state_address: "0/1/3"
+
+  - name: "Stikk loftstue"
+    address: "0/1/4"
+    state_address: "0/1/5"
+
+  - name: "Håndkletørkere"
+    address: "0/1/6"
+    state_address: "0/1/7"
+
+# Regular on/off lights
+  - name: "Utelys"
+    address: "0/0/10"
+    state_address: "0/0/11"
+
+  - name: "Trapp plan 1"
+    address: "1/1/186"
+    state_address: "1/1/189"
+
+  - name: "Trapp plan 2"
+    address: "1/1/192"
+    state_address: "1/1/195"
+
+  - name: "Entre vegglys"
+    address: "1/1/12"
+    state_address: "1/1/15"
+
+  - name: "WC-rom speil"
+    address: "1/1/36"
+    state_address: "1/1/39"
+
+  - name: "Master sov taklampe"
+    address: "1/2/155"
+    state_address: "1/2/117"
+
+  - name: "Klesskap Katharina (alt2)"
+    address: "1/2/126"
+    state_address: "1/2/129"

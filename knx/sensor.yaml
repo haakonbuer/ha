@@ -1,0 +1,96 @@
+
+  - name: "Vaskerom gulvtemp"
+    state_address: "2/0/25"
+    type: temperature
+
+  - name: "Vaskerom lufttemp"
+    state_address: "2/0/24"
+    type: temperature
+
+  - name: "Vaskerom vektet temperatur"
+    state_address: "2/0/30"
+    type: temperature
+      
+  - name: "Bryter ved trapp - temperatur"
+    state_address: "3/1/1"
+    type: temperature
+
+  - name: "Bryter stue - temperatur"
+    state_address: "3/1/3"
+    type: temperature
+
+  - name: "Bryter stue kjøkken - temperatur"
+    state_address: "2/1/14"
+    type: temperature
+
+  - name: "Master bad gulvtemp"
+    state_address: "2/2/14"
+    type: temperature
+
+  - name: "Master bad lufttemp"
+    state_address: "2/2/13"
+    type: temperature
+
+  - name: "Loftstue temperatur"
+    state_address: "2/2/2"
+    type: temperature
+
+  - name: "Master sov temperatur"
+    state_address: "2/2/46"
+    type: temperature
+
+  - name: "Sov 1 temperatur"
+    state_address: "2/2/24"
+    type: temperature
+
+  - name: "Sov 2 temperatur"
+    state_address: "2/2/35"
+    type: temperature
+
+  - name: "Varmepådrag loftstue"
+    state_address: "2/2/6"
+    type: percent
+
+  - name: "Varmepådrag kjellergang"
+    state_address: "2/0/6"
+    type: percent
+
+  - name: "Varmepådrag kjellerstue"
+    state_address: "2/0/17"
+    type: percent
+
+  - name: "Varmepådrag vaskerom"
+    state_address: "2/0/28"
+    type: percent
+
+  - name: "Varmepådrag master sov"
+    state_address: "2/2/50"
+    type: percent
+
+  - name: "Varmepådrag sov 1"
+    state_address: "2/2/28"
+    type: percent
+
+  - name: "Varmepådrag sov 2"
+    state_address: "2/2/39"
+    type: percent
+
+  - name: "Varmepådrag entre"
+    state_address: "2/1/6"
+    type: percent
+
+  - name: "Varmepådrag stue"
+    state_address: "2/1/17"
+    type: percent
+
+  - name: "Varmepådrag kjøkken"
+    state_address: "2/1/28"
+    type: percent
+
+  - name: "Power potential"
+    state_address: "0/0/102"
+    type: electric_potential
+
+  - name: "Power current"
+    state_address: "0/0/103"
+    type: electric_current

@@ -1,0 +1,34 @@
+
+  - name: "Klesskap Katharina styrke"
+    address: "1/2/128"
+    state_address: "1/2/130"
+    type: percent
+
+  - name: "Dali dim tid"
+    address: "0/0/150"
+    type: time_period_100msec
+
+  - name: "Master sov bryter LED %"
+    address: "1/2/140"
+    type: percent
+    step: 10
+
+  - name: "Bryter ved trapp LED %"
+    address: "3/1/0"
+    type: percent
+    step: 10
+
+  - name: "Bryter stue LED %"
+    address: "3/1/4"
+    type: percent
+    step: 10
+      
+  - name: "Bryter stue kjøkken LED %"
+    address: "3/1/7"
+    type: percent
+    step: 10
+
+  - name: "Bryter stue TV LED %"
+    address: "3/1/9"
+    type: percent
+    step: 10
