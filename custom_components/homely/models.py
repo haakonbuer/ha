@@ -35,11 +35,18 @@ class HomelyRuntimeData:
     # threshold (e.g. a fresh CI runner or an appliance starting HA right after
     # boot), wrongly suppressing the first reconnect/refresh/warning.
     ws_disconnect_refresh_monotonic: float = float("-inf")
+    # Failed initial/reconnect attempts schedule bounded REST snapshots so a
+    # websocket outage cannot leave entity state stale until the daily poll.
+    ws_outage_poll_backoff_level: int = 0
+    ws_outage_poll_pending: bool = False
     ws_watchdog_reconnect_monotonic: float = float("-inf")
     ws_watchdog_last_warning_monotonic: float = float("-inf")
     ws_watchdog_last_reason: str | None = None
     ws_watchdog_last_action_at: datetime | None = None
     ws_watchdog_recovery_history_monotonic: list[float] = field(default_factory=list)
+    # Last time a websocket event for a device missing from the cached snapshot
+    # forced an early /home poll (new devices should not wait for the daily poll).
+    ws_unknown_device_refresh_monotonic: float = float("-inf")
     # None until a poll actually succeeds; seeded setups must not fake one.
     last_successful_poll_monotonic: float | None = None
     last_data_activity_monotonic: float = field(default_factory=monotonic)
@@ -56,6 +63,8 @@ class HomelyRuntimeData:
     last_websocket_event_at: datetime | None = None
     last_websocket_event_type: str | None = None
     last_ws_event_details: dict[str, Any] | None = None
+    han_demand_last_event_monotonic: dict[str, float] = field(default_factory=dict)
+    han_refresh_last_attempt_monotonic: float = float("-inf")
     last_armed_by: str | None = None
     last_armed_user_id: str | None = None
     last_armed_at: str | None = None
@@ -76,6 +85,9 @@ class HomelyRuntimeData:
     topology_reload_pending: bool = False
     force_api_refresh_once: bool = False
     partner_code: int | str | None = None
+    # Options the entry was loaded with, minus meter multipliers. A change that
+    # only touches multipliers is applied live and must not trigger a reload.
+    reload_options: dict[str, Any] = field(default_factory=dict)
 
 
 type HomelyConfigEntry = ConfigEntry[HomelyRuntimeData]

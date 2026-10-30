@@ -29,8 +29,8 @@
   - name: "Trapp taklys"
     address: "1/1/180"
     state_address: "1/1/183"
-    brightness_address: "1/1/181"
-    brightness_state_address: "1/1/184"
+      #brightness_address: "1/1/181"
+      #brightness_state_address: "1/1/184"
 
 
 ###############################################

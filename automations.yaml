@@ -73,9 +73,9 @@
     target:
       area_id:
       - kitchen
-      - trapp
       - living_room
       - entrance
+      entity_id: light.hue_tak_trapp
     action: light.turn_on
   - action: switch.turn_on
     metadata: {}
@@ -85,18 +85,18 @@
       - switch.trapp_plan_1
       - switch.trapp_plan_2
       - switch.entre_vegglys
+  - action: light.turn_on
+    metadata: {}
+    target:
+      entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+    data:
+      brightness_pct: 100
+      transition: 2000
   - metadata: {}
     data:
       brightness_pct: 100
     target:
       area_id: bad
-    action: light.turn_on
-  - metadata: {}
-    data:
-      transition: 600
-      brightness_pct: 75
-    target:
-      device_id: 998df95f879649692a35225f00803dc3
     action: light.turn_on
   - action: light.turn_on
     metadata: {}
@@ -104,24 +104,6 @@
       brightness_pct: 100
     target:
       area_id: entrance
-  - action: light.turn_on
-    metadata: {}
-    data:
-      transition: 1200
-      brightness_pct: 100
-    target:
-      entity_id:
-      - light.hannahs_room
-      - light.hue_color_candle_right
-  - action: light.turn_on
-    metadata: {}
-    data:
-      transition: 1200
-      brightness_pct: 100
-    target:
-      entity_id:
-      - light.leselys_stua
-      - light.nikolai_bulb
   - delay:
       hours: 0
       minutes: 5
@@ -1067,3 +1049,69 @@
       light_switch:
         entity_id: light.switch_garasje_lys_light
       time_delay: 10
+- id: '1793315060636'
+  alias: HSwitch Master bedroom new
+  description: ''
+  use_blueprint:
+    path: dustins/zha-philips-hue-v2-smart-dimmer-switch-and-remote-rwl022.yaml
+    input:
+      zha_device: d3108b644f251600b4a32127536e321b
+      Power_Press:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+        data: {}
+      Power_Press2x:
+      - action: light.turn_off
+        metadata: {}
+        target:
+          entity_id:
+          - light.master_sov_spotter
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
+        data: {}
+      - action: light.turn_on
+        metadata: {}
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+        data:
+          brightness_pct: 15
+      Up_Press:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+        data:
+          brightness_step_pct: 10
+      Down_Press:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+        data:
+          brightness_step_pct: -10
+      Hue_Press:
+      - action: light.turn_off
+        metadata: {}
+        target:
+          entity_id: light.nabu_casa_ha_connect_zbt_1_sov_taklampe
+        data: {}
+      Hue_Press2x:
+      - action: light.turn_off
+        metadata: {}
+        target:
+          entity_id:
+          - light.master_sov_spotter
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
+        data: {}
+      Power_HoldPress:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          entity_id:
+          - light.master_sov_spotter
+          - light.master_sov_garderobe_spot
+          - light.master_sov_kontor_spot
+        data: {}

@@ -152,11 +152,16 @@ skru_av_forste_etg:
   mode: single
   alias: Skru av lys i 1. etg
   sequence:
-  - target:
-      floor_id:
-      - 1_etasje
-    action: light.turn_off
+  - action: light.turn_off
     data: {}
+    target:
+      area_id:
+      - entrance
+      - kitchen
+      - living_room
+      - tv
+      - wc_rom
+      entity_id: light.hue_tak_trapp
   - action: switch.turn_off
     metadata: {}
     data: {}

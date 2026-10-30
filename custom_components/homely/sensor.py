@@ -18,22 +18,24 @@ from homeassistant.helpers.update_coordinator import (
 
 from .const import DOMAIN
 from .device_state import get_current_device, is_device_available
+from .meter_multiplier import apply_meter_multiplier, get_meter_multiplier
 from .models import HomelyConfigEntry, get_entry_runtime_data
 from .naming import (
+    build_device_info,
     build_suggested_object_id,
-    get_device_area,
     get_device_display_name,
     humanize_label,
 )
 from .runtime_state import (
     websocket_connection_state,
 )
+from .sensors.discover import _get_value_by_path, discover_device_sensors
 from .websocket import WEBSOCKET_STATUS_OPTIONS as SDK_WEBSOCKET_STATUS_OPTIONS
-from .sensors.discover import discover_device_sensors, _get_value_by_path
 
 PARALLEL_UPDATES = 0
 SensorConfig = dict[str, Any]
 FallbackDataGetter = Callable[[], dict[str, Any] | None]
+MeterMultiplierGetter = Callable[[str], float]
 DIAGNOSTIC_ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
 WEBSOCKET_STATUS_OPTIONS = [
     *SDK_WEBSOCKET_STATUS_OPTIONS,
@@ -53,6 +55,9 @@ async def async_setup_entry(
 
     def _fallback_data_getter() -> dict[str, Any] | None:
         return runtime_data.last_data
+
+    def _meter_multiplier_getter(device_id: str) -> float:
+        return get_meter_multiplier(entry.options, device_id)
 
     removed_sensor_suffixes = [
         "last_successful_poll",
@@ -91,6 +96,8 @@ async def async_setup_entry(
                         device,
                         sensor_config,
                         fallback_data_getter=_fallback_data_getter,
+                        location_id=location_id,
+                        meter_multiplier_getter=_meter_multiplier_getter,
                     )
                 )
 
@@ -106,11 +113,16 @@ class HomelySensor(CoordinatorEntity, SensorEntity):
         device: dict[str, Any],
         sensor_config: SensorConfig,
         fallback_data_getter: FallbackDataGetter | None = None,
+        location_id: str | None = None,
+        meter_multiplier_getter: MeterMultiplierGetter | None = None,
     ) -> None:
         super().__init__(coordinator)
         self._attr_has_entity_name = True
         self._device_id = str(device.get("id"))
         self._path = str(sensor_config["path"])
+        self._meter_multiplier_getter = (
+            meter_multiplier_getter if sensor_config.get("meter_scaled") else None
+        )
         self._transform_value = sensor_config.get("transform_value")
         self._transform_device_value = sensor_config.get("transform_device_value")
         self._unit = sensor_config.get("unit")
@@ -161,14 +173,7 @@ class HomelySensor(CoordinatorEntity, SensorEntity):
             if category == "diagnostic":
                 self._attr_entity_category = DIAGNOSTIC_ENTITY_CATEGORY
 
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self._device_id)},
-            name=self._device_name,
-            manufacturer="Homely",
-            model=device.get("modelName"),
-            serial_number=device.get("serialNumber"),
-            suggested_area=get_device_area(device),
-        )
+        self._attr_device_info = build_device_info(device)
 
     def _get_current_device(self) -> dict[str, Any] | None:
         """Return latest device payload from coordinator cache."""
@@ -190,7 +195,12 @@ class HomelySensor(CoordinatorEntity, SensorEntity):
             return None
 
         value = _get_value_by_path(device, self._path)
-        return self._transform_runtime_value(device, value)
+        value = self._transform_runtime_value(device, value)
+        if self._meter_multiplier_getter is not None:
+            value = apply_meter_multiplier(
+                value, self._meter_multiplier_getter(self._device_id)
+            )
+        return value
 
     def _transform_runtime_value(self, device: dict[str, Any], value: Any) -> Any:
         """Apply configured transforms to a runtime value."""

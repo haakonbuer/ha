@@ -3119,12 +3119,31 @@ var MediaControlService = class {
 	}
 };
 //#endregion
+//#region src/utils/entity-name-utils.ts
+var FIRST_SUPPORTED_MAJOR = 2026;
+var FIRST_SUPPORTED_MINOR = 4;
+var supportsEntityNames = (hass) => {
+	if (typeof hass?.formatEntityName !== "function") return false;
+	const [major, minor] = (hass?.config?.version ?? "").split(".", 2);
+	return Number(major) > FIRST_SUPPORTED_MAJOR || Number(major) === FIRST_SUPPORTED_MAJOR && Number(minor) >= FIRST_SUPPORTED_MINOR;
+};
+var getEntityName = (hass, hassEntity, name) => {
+	if (!hassEntity) return "";
+	if (supportsEntityNames(hass)) return hass.formatEntityName(hassEntity, name) ?? "";
+	return hassEntity.attributes.friendly_name ?? "";
+};
+var getEntityNameWithoutDevice = (hass, hassEntity, deviceName) => {
+	if (supportsEntityNames(hass)) return getEntityName(hass, hassEntity, { type: "entity" });
+	return getEntityName(hass, hassEntity).replaceAll(deviceName, "").trim();
+};
+//#endregion
 //#region src/model/media-player.ts
 var MediaPlayer = class MediaPlayer {
-	constructor(hassEntity, config, mediaPlayerHassEntities) {
+	constructor(hassEntity, config, mediaPlayerHassEntities, hass) {
 		this.id = hassEntity.entity_id;
 		this.config = config;
-		this.name = this.getEntityName(hassEntity);
+		this.hass = hass;
+		this.name = this.getPlayerName(hassEntity);
 		this.state = hassEntity.state;
 		this.attributes = hassEntity.attributes;
 		this.members = mediaPlayerHassEntities ? this.createGroupMembers(hassEntity, mediaPlayerHassEntities) : [this];
@@ -3156,15 +3175,15 @@ var MediaPlayer = class MediaPlayer {
 		if (this.config.mediaTitleRegexToReplace) track = track.replace(new RegExp(this.config.mediaTitleRegexToReplace, "g"), this.config.mediaTitleReplacement || "");
 		return track;
 	}
-	getEntityName(hassEntity) {
-		const name = hassEntity.attributes.friendly_name || "";
+	getPlayerName(hassEntity) {
+		const name = getEntityName(this.hass, hassEntity);
 		if (this.config.entityNameRegexToReplace) return name.replace(new RegExp(this.config.entityNameRegexToReplace, "g"), this.config.entityNameReplacement || "");
 		return name;
 	}
 	createGroupMembers(mainHassEntity, mediaPlayerHassEntities) {
 		const groupPlayerIds = getGroupPlayerIds(mainHassEntity);
 		return mediaPlayerHassEntities.reduce((players, hassEntity) => {
-			if (groupPlayerIds.includes(hassEntity.entity_id)) return [...players, new MediaPlayer(hassEntity, this.config)];
+			if (groupPlayerIds.includes(hassEntity.entity_id)) return [...players, new MediaPlayer(hassEntity, this.config, void 0, this.hass)];
 			return players;
 		}, []);
 	}
@@ -3289,7 +3308,7 @@ var Store = class {
 	}
 	createPlayerGroup(hassEntity, mediaPlayerHassEntities) {
 		try {
-			return new MediaPlayer(hassEntity, this.config, mediaPlayerHassEntities);
+			return new MediaPlayer(hassEntity, this.config, mediaPlayerHassEntities, this.hass);
 		} catch (e) {
 			console.error("Failed to create group", JSON.stringify(hassEntity), e);
 			return;
@@ -3998,7 +4017,7 @@ var PredefinedGroupEditor = class extends BaseEditor {
 		const schema = [{
 			type: "integer",
 			name: "volume",
-			label: `${this.hass.states[player]?.attributes.friendly_name ?? player}${volume !== void 0 ? `: ${volume}` : ""}`,
+			label: `${getEntityName(this.hass, this.hass.states[player]) || player}${volume !== void 0 ? `: ${volume}` : ""}`,
 			valueMin: 0,
 			valueMax: 100
 		}];
@@ -8464,7 +8483,7 @@ __decorate([n$5({
 })], LitVirtualizer.prototype, "scroller", void 0);
 //#endregion
 //#region src/upstream/resources/virtualizer.ts
-if (!customElements.get("lit-virtualizer")) customElements.define("lit-virtualizer", LitVirtualizer);
+if (!customElements.get("sonos-lit-virtualizer")) customElements.define("sonos-lit-virtualizer", LitVirtualizer);
 //#endregion
 //#region src/upstream/util/brands-url.ts
 var brandsUrl = (options) => `https://brands.home-assistant.io/_/${options.domain}/${options.darkOptimized ? "dark_" : ""}${options.type}.png`;
@@ -8809,12 +8828,12 @@ var HaMediaPlayerBrowse = class HaMediaPlayerBrowse extends i$5 {
                           </div>
                         ` : this.preferredLayout === "list" ? x`
                             <ha-list>
-                              <lit-virtualizer
+                              <sonos-lit-virtualizer
                                 scroller
                                 .items=${children}
                                 style=${o$1({ height: `${children.length * 72 + 26}px` })}
                                 .renderItem=${this._renderListItem}
-                              ></lit-virtualizer>
+                              ></sonos-lit-virtualizer>
                               ${currentItem.not_shown ? x`
                                     <ha-list-item noninteractive class="not-shown" .graphic=${mediaClass.show_list_images ? "medium" : "avatar"}>
                                       <span class="title">
@@ -8835,7 +8854,7 @@ var HaMediaPlayerBrowse = class HaMediaPlayerBrowse extends i$5 {
                                     </div>
                                   ` : ""}
                             ` : this.preferredLayout === "grid" || this.preferredLayout === "auto" && childrenMediaClass.layout === "grid" ? x`
-                                <lit-virtualizer
+                                <sonos-lit-virtualizer
                                   scroller
                                   .layout=${grid({
 			itemSize: getGridItemSize(this.itemsPerRow, childrenMediaClass.thumbnail_ratio === "portrait"),
@@ -8850,7 +8869,7 @@ var HaMediaPlayerBrowse = class HaMediaPlayerBrowse extends i$5 {
 			portrait: childrenMediaClass.thumbnail_ratio === "portrait",
 			not_shown: !!currentItem.not_shown
 		})}"
-                                ></lit-virtualizer>
+                                ></sonos-lit-virtualizer>
                                 ${currentItem.not_shown ? x`
                                       <div class="grid not-shown">
                                         <div class="title">
@@ -8860,12 +8879,12 @@ var HaMediaPlayerBrowse = class HaMediaPlayerBrowse extends i$5 {
                                     ` : ""}
                               ` : x`
                                 <ha-list>
-                                  <lit-virtualizer
+                                  <sonos-lit-virtualizer
                                     scroller
                                     .items=${children}
                                     style=${o$1({ height: `${children.length * 72 + 26}px` })}
                                     .renderItem=${this._renderListItem}
-                                  ></lit-virtualizer>
+                                  ></sonos-lit-virtualizer>
                                   ${currentItem.not_shown ? x`
                                         <ha-list-item noninteractive class="not-shown" .graphic=${mediaClass.show_list_images ? "medium" : "avatar"}>
                                           <span class="title">
@@ -9436,13 +9455,13 @@ var HaMediaPlayerBrowse = class HaMediaPlayerBrowse extends i$5 {
           --mdc-theme-secondary: rgba(var(--rgb-primary-color), 0.5);
         }
 
-        lit-virtualizer {
+        sonos-lit-virtualizer {
           display: block;
           height: 100%;
           overflow: auto !important;
         }
 
-        lit-virtualizer.not_shown {
+        sonos-lit-virtualizer.not_shown {
           height: calc(100% - 36px);
         }
 
@@ -9480,7 +9499,7 @@ __decorate$1([r$3()], HaMediaPlayerBrowse.prototype, "_parentItem", void 0);
 __decorate$1([r$3()], HaMediaPlayerBrowse.prototype, "_currentItem", void 0);
 __decorate$1([e$3(".header")], HaMediaPlayerBrowse.prototype, "_header", void 0);
 __decorate$1([e$3(".content")], HaMediaPlayerBrowse.prototype, "_content", void 0);
-__decorate$1([e$3("lit-virtualizer")], HaMediaPlayerBrowse.prototype, "_virtualizer", void 0);
+__decorate$1([e$3("sonos-lit-virtualizer")], HaMediaPlayerBrowse.prototype, "_virtualizer", void 0);
 __decorate$1([t$2({ passive: true })], HaMediaPlayerBrowse.prototype, "_scroll", null);
 HaMediaPlayerBrowse = __decorate$1([t$3("sonos-ha-media-player-browse")], HaMediaPlayerBrowse);
 //#endregion
@@ -13610,10 +13629,17 @@ var Volumes = class extends i$5 {
 		const relatedEntities = await this.store.hassService.getRelatedEntities(player, "switch", "number", "sensor");
 		const { additionalControlsFontSize: fontSize = .75 } = this.store.config.volumes ?? {};
 		return relatedEntities.map((relatedEntity) => {
-			relatedEntity.attributes.friendly_name = relatedEntity.attributes.friendly_name?.replaceAll(player.name, "")?.trim() ?? "";
+			const entityName = getEntityNameWithoutDevice(this.store.hass, relatedEntity, player.name);
+			const stateObj = {
+				...relatedEntity,
+				attributes: {
+					...relatedEntity.attributes,
+					friendly_name: entityName
+				}
+			};
 			return x`
         <div style="--ha-font-size-m: ${fontSize}rem">
-          <state-card-content .stateObj=${relatedEntity} .hass=${this.store.hass}></state-card-content>
+          <state-card-content .stateObj=${stateObj} .hass=${this.store.hass}></state-card-content>
         </div>
       `;
 		});
